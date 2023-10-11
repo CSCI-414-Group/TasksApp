@@ -1,7 +1,19 @@
 from flask import Flask, jsonify, render_template, request
 import sqlite3
+from flask_pymongo import PyMongo
+from pymongo import MongoClient
 
 app = Flask(__name__)
+
+client = MongoClient("mongodb://localhost:27017/")  # Replace with your MongoDB connection string
+app.config["MONGO_URI"] = "mongodb://localhost:27017"
+db = PyMongo(app)
+
+
+client = MongoClient("mongodb://localhost:27017/")
+db = client.User
+users = db.users
+
 
 # Define the path to your SQLite database file
 DATABASE = 'db/book.db'
@@ -14,6 +26,7 @@ DATABASE = 'db/book.db'
 # Route to render the index.html page
 @app.route('/')
 def index():
+    users.insert_one({"name":"james","age":14})
     return render_template('index.html')
 
 if __name__ == '__main__':
