@@ -5,13 +5,8 @@ from pymongo import MongoClient
 
 app = Flask(__name__)
 
-client = MongoClient("mongodb://localhost:27017/")  # Replace with your MongoDB connection string
-app.config["MONGO_URI"] = "mongodb://localhost:27017"
-db = PyMongo(app)
-
-
-client = MongoClient("mongodb://localhost:27017/")
-db = client.User
+client = MongoClient("mongodb://localhost:27017/") #connect to ur mongodb url
+db = client.User 
 users = db.users
 
 
