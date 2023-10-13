@@ -55,26 +55,20 @@ def getTasks():
 
 @app.route('/create_account', methods=['POST'])
 def createAccount():
-    error_message = None  # Initialize error message as None
 
     email = request.form['email']
     password = request.form['password']
 
-    if email_exists(email):
-        error_message = "Email already exists. Please choose another email."
+    conn = psycopg2.connect(**db_config)
+    cur = conn.cursor()
 
-    if error_message is None:
-        conn = psycopg2.connect(**db_config)
-        cur = conn.cursor()
-
-        cur.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (email, hashPassword(password)))
+    cur.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (email, hashPassword(password)))
             
-        conn.commit()
-        conn.close()
+    conn.commit()
+    conn.close()
 
-        return redirect('/tasks')  # Redirect to the tasks page
+    return redirect('/tasks') 
 
-    return render_template('Create.html', error_message=error_message)
 
 if __name__ == '__main__':
     app.run(debug=True)
