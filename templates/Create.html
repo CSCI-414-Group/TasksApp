@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Account</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Create_Login.css') }}">
+</head>
+<body>
+    <h1 class="title">Task Manager</h1>
+    <div class="container">
+        <form action="/create_account" method="POST">
+            <h2>Create Account</h2>
+            <div class="input-container">
+                <label for="email">Email</label>
+                <input type="text" id="email" name="email" required>
+            </div>
+            <div class="input-container">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn">Create Account</button>
+        </form>
+        <p>Already have an account? <a href="/login">Login</a></p>
+    </div>
+</body>
+</html>
