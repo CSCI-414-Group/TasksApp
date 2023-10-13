@@ -3,26 +3,17 @@ import sqlite3
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
 
+from flask import Flask, render_template
+
 app = Flask(__name__)
 
-client = MongoClient("mongodb://localhost:27017/") #connect to ur mongodb url
-db = client.User 
-users = db.users
+@app.route('/', methods=['GET', 'POST'])
+def create():
+    return render_template('Create.html')
 
-
-# Define the path to your SQLite database file
-DATABASE = 'db/book.db'
-
-@app.route('/api/books', methods=['GET'])
-#def do_something():
-
-
-
-# Route to render the index.html page
-@app.route('/')
-def index():
-    users.insert_one({"name":"james","age":14})
-    return render_template('index.html')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    return render_template('Login.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True)
