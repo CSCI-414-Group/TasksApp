@@ -9,6 +9,7 @@
     <div class="container">
         <form action="/create_account" method="POST">
             <h2>Create Account</h2>
+            <!-- Your input fields here -->
             <div class="input-container">
                 <label for="email">Email</label>
                 <input type="text" id="email" name="email" required>
@@ -17,6 +18,10 @@
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required>
             </div>
+            <!-- Error message container -->
+            {% if error_message %}
+                <div class="error-message" style="color: red;">{{ error_message }}</div>
+            {% endif %}
             <button type="submit" class="btn">Create Account</button>
         </form>
         <p>Already have an account? <a href="/login">Login</a></p>
