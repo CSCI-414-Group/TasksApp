@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, jsonify  
 import psycopg2
 import hashlib
 import os
@@ -30,6 +30,16 @@ def email_exists(email):
     result = cur.fetchone()
     conn.close()
     return result[0] > 0
+
+@app.route("/check_email", methods=["POST"])
+def check_email():
+    data = request.get_json()
+    email = data.get("email")
+
+    # Use your email_exists function to check if the email exists in the database
+    email_exists_result = email_exists(email)
+
+    return jsonify({"exists": email_exists_result})
 
 @app.route('/', methods=['GET', 'POST'])
 def create():

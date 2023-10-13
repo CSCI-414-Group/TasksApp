@@ -3,6 +3,8 @@
 <head>
     <title>Create Account</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Create_Login.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
 </head>
 <body>
     <h1 class="title">Task Manager</h1>
@@ -12,17 +14,15 @@
             <!-- Your input fields here -->
             <div class="input-container">
                 <label for="email">Email</label>
-                <input type="text" id="email" name="email" required>
+                <input type="text" id="email" name="email" required onblur="checkEmail()">
             </div>
             <div class="input-container">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required>
             </div>
             <!-- Error message container -->
-            {% if error_message %}
-                <div class="error-message" style="color: red;">{{ error_message }}</div>
-            {% endif %}
-            <button type="submit" class="btn">Create Account</button>
+            <div class="error-message" id="error-message" style="color: red;"></div>
+            <button type="submit" class="btn" id="create-account-button">Create Account</button>
         </form>
         <p>Already have an account? <a href="/login">Login</a></p>
     </div>
