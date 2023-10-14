@@ -1,13 +1,21 @@
-from flask import Flask, request, render_template, redirect, url_for, jsonify, flash, session  
+from flask import Flask, request, render_template, redirect, url_for, jsonify, flash
+from flask import Flask, session
+
+
 import psycopg2
 import hashlib
 import os
+import uuid
+
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
 
 from flask import Flask, render_template
 
 app = Flask(__name__)
+
+app.config['SESSION_TYPE'] = 'filesystem'  # You can choose other options like 'redis' or 'sqlalchemy'
+app.secret_key = str(uuid.uuid4())  # Replace with a secure secret key
 
 db_config = {
     'dbname': 'TaskManagement',
@@ -16,6 +24,7 @@ db_config = {
     'host': 'localhost',
     'port': '5432'
 }
+
 
 def hashPassword(password):
     salt = "esfe3432432432fdsf"
@@ -45,10 +54,6 @@ def check_email():
 def create():
     return render_template('Create.html')
 
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     return render_template('Login.html')
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -70,11 +75,13 @@ def login():
         else:
             flash('Invalid email or password. Please try again.', 'error')
             conn.close()
-
     return render_template('Login.html')
  
 @app.route('/tasks',  methods=['GET', 'POST'])
 def getTasks():
+    username = session.get('email')
+    print(f"Username in session: {username}")
+
     return render_template('index.html')
 
 @app.route('/create_account', methods=['POST'])
