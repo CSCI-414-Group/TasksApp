@@ -1,6 +1,4 @@
 from flask import Flask, request, render_template, redirect, url_for, jsonify, flash, session  
-from flask_bcrypt import Bcrypt  # Import the Bcrypt module
-# from passlib.hash import pbkdf2_sha256
 import psycopg2
 import hashlib
 import os
@@ -10,12 +8,11 @@ from pymongo import MongoClient
 from flask import Flask, render_template
 
 app = Flask(__name__)
-bcrypt = Bcrypt(app) 
 
 db_config = {
-    'dbname': 'Project1',
+    'dbname': 'TaskManagement',
     'user': 'postgres',
-    'password': 'TryMe@2020$',
+    'password': 'shaheen1',
     'host': 'localhost',
     'port': '5432'
 }
@@ -64,7 +61,7 @@ def login():
         cur.execute("SELECT password FROM users WHERE username = %s", (email,))
         stored_password_hash = cur.fetchone()
 
-        if stored_password_hash and bcrypt.check_password_hash(stored_password_hash[0], password):
+        if stored_password_hash and hashPassword(password):
             # Authentication successful, set session variables and redirect to tasks page
             session['logged_in'] = True
             session['email'] = email
