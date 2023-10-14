@@ -1,4 +1,6 @@
-from flask import Flask, request, render_template, redirect, url_for, jsonify  
+from flask import Flask, request, render_template, redirect, url_for, jsonify, flash, session  
+from flask_bcrypt import Bcrypt  # Import the Bcrypt module
+# from passlib.hash import pbkdf2_sha256
 import psycopg2
 import hashlib
 import os
@@ -8,11 +10,12 @@ from pymongo import MongoClient
 from flask import Flask, render_template
 
 app = Flask(__name__)
+bcrypt = Bcrypt(app) 
 
 db_config = {
-    'dbname': 'TaskManagement',
+    'dbname': 'Project1',
     'user': 'postgres',
-    'password': 'shaheen1',
+    'password': 'TryMe@2020$',
     'host': 'localhost',
     'port': '5432'
 }
@@ -45,10 +48,34 @@ def check_email():
 def create():
     return render_template('Create.html')
 
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     return render_template('Login.html')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('Login.html')
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
 
+        conn = psycopg2.connect(**db_config)
+        cur = conn.cursor()
+
+        cur.execute("SELECT password FROM users WHERE username = %s", (email,))
+        stored_password_hash = cur.fetchone()
+
+        if stored_password_hash and bcrypt.check_password_hash(stored_password_hash[0], password):
+            # Authentication successful, set session variables and redirect to tasks page
+            session['logged_in'] = True
+            session['email'] = email
+            conn.close()
+            return redirect('/tasks')
+        else:
+            flash('Invalid email or password. Please try again.', 'error')
+            conn.close()
+
+    return render_template('Login.html')
+ 
 @app.route('/tasks',  methods=['GET', 'POST'])
 def getTasks():
     return render_template('index.html')
