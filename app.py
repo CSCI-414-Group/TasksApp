@@ -54,6 +54,7 @@ def create():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -63,21 +64,17 @@ def login():
 
         cur.execute("SELECT password FROM users WHERE username = %s", (email,))
         stored_password_hash = cur.fetchone()
-        
-        conn.close()
 
         if stored_password_hash and stored_password_hash[0] == hashPassword(password):
             # Authentication successful, set session variables and redirect to tasks page
             session['logged_in'] = True
             session['email'] = email
-            # conn.close()
+            conn.close()
             return redirect('/tasks')
         else:
             flash('Invalid email or password. Please try again.', 'error')
-            # conn.close()
 
     return render_template('Login.html')
-
  
 @app.route('/tasks',  methods=['GET', 'POST'])
 def getTasks():
