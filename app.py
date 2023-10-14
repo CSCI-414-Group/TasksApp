@@ -1,18 +1,21 @@
-from flask import Flask, request, render_template, redirect, url_for, jsonify, flash, session  
+from flask import Flask, request, render_template, redirect, url_for, jsonify, flash, session 
+import secrets 
 import psycopg2
 import hashlib
 import os
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
 
+
 from flask import Flask, render_template
 
 app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)
 
 db_config = {
-    'dbname': 'TaskManagement',
+    'dbname': 'Project1',
     'user': 'postgres',
-    'password': 'shaheen1',
+    'password': 'TryMe@2020$',
     'host': 'localhost',
     'port': '5432'
 }
@@ -60,22 +63,27 @@ def login():
 
         cur.execute("SELECT password FROM users WHERE username = %s", (email,))
         stored_password_hash = cur.fetchone()
+        
+        conn.close()
 
-        if stored_password_hash and hashPassword(password):
+        if stored_password_hash and stored_password_hash[0] == hashPassword(password):
             # Authentication successful, set session variables and redirect to tasks page
             session['logged_in'] = True
             session['email'] = email
-            conn.close()
+            # conn.close()
             return redirect('/tasks')
         else:
             flash('Invalid email or password. Please try again.', 'error')
-            conn.close()
+            # conn.close()
 
     return render_template('Login.html')
+
  
 @app.route('/tasks',  methods=['GET', 'POST'])
 def getTasks():
     return render_template('index.html')
+
+
 
 @app.route('/create_account', methods=['POST'])
 def createAccount():
