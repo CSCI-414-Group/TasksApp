@@ -2,7 +2,6 @@
 <html>
 <head>
     <title>Create Account</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Create_Login.css') }}">
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 
 </head>
@@ -24,7 +23,9 @@
             <div class="error-message" id="error-message" style="color: red;"></div>
             <button type="submit" class="btn" id="create-account-button">Create Account</button>
         </form>
-        <p>Already have an account? <a href="/login">Login</a></p>
+        <p>Already have an account? <a href="/loginView">Login</a></p>
     </div>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Create_Login.css') }}">
+
 </body>
 </html>

@@ -3,37 +3,91 @@ import psycopg2
 import hashlib
 import os
 import uuid
-
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
-
-
 from flask import Flask, render_template
 
 app = Flask(__name__)
+app.config['SESSION_TYPE'] = 'filesystem'  # You can choose other options like 'redis' or 'sqlalchemy'
+app.secret_key = str(uuid.uuid4())  # Replace with a secure secret key
+
 
 db_config = {
-    'dbname': 'Project1',
+    'dbname': 'TaskManagement',
     'user': 'postgres',
-    'password': 'TryMe@2020$',
+    'password': 'shaheen1',
     'host': 'localhost',
     'port': '5432'
 }
 
-
 def hashPassword(password):
-    salt = "esfe3432432432fdsf"
-    iterations = 100000
-    password_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), iterations)
-    return password_hash
+    sha256_hash = hashlib.sha256()
+    sha256_hash.update(password.encode('utf-8'))
+    hash_result = sha256_hash.hexdigest()
+    return hash_result
 
 def email_exists(email):
+
     conn = psycopg2.connect(**db_config)
     cur = conn.cursor()
     cur.execute("SELECT COUNT(*) FROM users WHERE username = %s", (email,))
     result = cur.fetchone()
     conn.close()
     return result[0] > 0
+
+@app.route('/', methods=['GET', 'POST'])
+def create():
+    return render_template('Create.html')
+
+@app.route('/loginView', methods=['GET', 'POST'])
+def loginView():    
+    return render_template('Login.html')
+
+@app.route('/login', methods=['POST'])
+def login_post():
+    email = request.form['email']
+    password = request.form['password']
+
+    # You can add your authentication logic here
+    conn = psycopg2.connect(**db_config)
+    cur = conn.cursor()
+
+    cur.execute("SELECT user_id, password FROM users WHERE username = %s", (email,))
+    result = cur.fetchone()
+
+    if result is not None:
+        user_id, stored_password_hash = result
+        conn.close()
+
+        if stored_password_hash == hashPassword(password):
+            session['userId'] = user_id
+            return redirect("/tasks")
+        else:
+            flash('Incorrect password or username. Please try again.', 'error')
+            return redirect("/loginView")
+    else:
+        flash('Incorrect password or username. Please try again.', 'error')
+        return redirect("/loginView")
+
+@app.route('/create_account', methods=['POST'])
+def createAccount():
+
+    email = request.form['email']
+    password = request.form['password']
+
+    conn = psycopg2.connect(**db_config)
+    cur = conn.cursor()
+
+    hashedPass=hashPassword(password)
+
+    cur.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (email, hashedPass))
+            
+    conn.commit()
+    conn.close()
+  
+    flash('Account created successfully! You can now log in.', 'success')
+
+    return redirect('/loginView') 
 
 @app.route("/check_email", methods=["POST"])
 def check_email():
@@ -45,60 +99,12 @@ def check_email():
 
     return jsonify({"exists": email_exists_result})
 
-@app.route('/', methods=['GET', 'POST'])
-def create():
-    return render_template('Create.html')
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-
-        conn = psycopg2.connect(**db_config)
-        cur = conn.cursor()
-
-        cur.execute("SELECT password FROM users WHERE username = %s", (email,))
-        stored_password_hash = cur.fetchone()
-
-        if stored_password_hash and stored_password_hash[0] == hashPassword(password):
-            # Authentication successful, set session variables and redirect to tasks page
-            session['logged_in'] = True
-            session['email'] = email
-            conn.close()
-            return redirect('/tasks')
-        else:
-            flash('Invalid email or password. Please try again.', 'error')
-            conn.close()
-
-    return render_template('Login.html')
- 
 @app.route('/tasks',  methods=['GET', 'POST'])
 def getTasks():
-    username = session.get('email')
-    print(f"Username in session: {username}")
+    userId = session.get('userId')
+    print(f"Username in session: {userId}")
 
     return render_template('index.html')
-
-
-
-@app.route('/create_account', methods=['POST'])
-def createAccount():
-
-    email = request.form['email']
-    password = request.form['password']
-
-    conn = psycopg2.connect(**db_config)
-    cur = conn.cursor()
-
-    cur.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (email, hashPassword(password)))
-            
-    conn.commit()
-    conn.close()
-
-    return redirect('/tasks') 
-
 
 if __name__ == '__main__':
     app.run(debug=True)
