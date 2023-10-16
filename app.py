@@ -15,7 +15,6 @@ app.secret_key = str(uuid.uuid4())  # Replace with a secure secret key
 app.config['TESTING'] = False
 
 
-
 db_config = {
     'dbname': 'TaskManagement',
     'user': 'postgres',
@@ -23,7 +22,6 @@ db_config = {
     'host': 'localhost',
     'port': '5432'
 }
-
 
 def login_required(f):
     @wraps(f)
