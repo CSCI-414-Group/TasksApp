@@ -1,31 +1,31 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Account</title>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Create_Login.css') }}">
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+{% endblock %}
 
-</head>
-<body>
-    <h1 class="title">Task Manager</h1>
-    <div class="container">
-        <form action="/create_account" method="POST">
-            <h2>Create Account</h2>
-            <!-- Your input fields here -->
-            <div class="input-container">
-                <label for="email">Email</label>
-                <input type="text" id="email" name="email" required onblur="checkEmail()">
-            </div>
-            <div class="input-container">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <!-- Error message container -->
-            <div class="error-message" id="error-message" style="color: red;"></div>
-            <button type="submit" class="btn" id="create-account-button">Create Account</button>
-        </form>
-        <p>Already have an account? <a href="/loginView">Login</a></p>
-    </div>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Create_Login.css') }}">
+{% block content %}
 
-</body>
-</html>
+<h1 class="title">Task Manager</h1>
+<div class="container">
+    <form action="/create_account" method="POST">
+        <h2>Create Account</h2>
+        <!-- Your input fields here -->
+        <div class="input-container">
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email" required onblur="checkEmail()">
+        </div>
+        <div class="input-container">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <!-- Error message container -->
+        <div class="error-message" id="error-message" style="color: red;"></div>
+        <button type="submit" class="btn" id="create-account-button">Create Account</button>
+    </form>
+    <p>Already have an account? <a href="/loginView">Login</a></p>
+</div>
+
+{% endblock %}

@@ -1,9 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Main Page</title>
-</head>
-<body>
-    <h1 class="title">Tasks</h1>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Create_Login.css') }}">
+
+{% endblock %}
+{% block content %}
+<h1 class="title">Tasks</h1>
+{% endblock %}
+
+
+    

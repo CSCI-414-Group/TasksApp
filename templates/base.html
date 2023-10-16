@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    {% block head %}
+    <title>{% block title %}{% endblock %}</title>
+    {% endblock %}
+  </head>
+  <body>
+    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="footer">
+        {% block footer %}
+        <div class="footer-container">
+          <div class="footer-left">
+            &copy; Copyright 2023 by KS, SL, FS </a>.
+          </div>
+          <div class="footer-right">
+            <a href="/contact">Contact Us</a> | <a href="/privacy">Privacy Policy</a>
+          </div>
+        </div>
+        {% endblock %}
+      </div>
+  </body>
+</html>
