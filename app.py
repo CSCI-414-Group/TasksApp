@@ -16,9 +16,9 @@ app.config['TESTING'] = False
 
 
 db_config = {
-    'dbname': 'TaskManagement',
+    'dbname': 'Project1',
     'user': 'postgres',
-    'password': 'shaheen1',
+    'password': 'TryMe@2020$',
     'host': 'localhost',
     'port': '5432'
 }
@@ -115,6 +115,11 @@ def check_email():
 @login_required
 def getTasks():
     return render_template('index.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/loginView')
 
 
 if __name__ == '__main__':
