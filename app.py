@@ -7,6 +7,7 @@ from flask_pymongo import PyMongo
 from pymongo import MongoClient
 from flask import Flask, render_template
 from functools import wraps
+from bson import ObjectId
 
 
 app = Flask(__name__)
@@ -14,14 +15,25 @@ app.config['SESSION_TYPE'] = 'filesystem'  # You can choose other options like '
 app.secret_key = str(uuid.uuid4())  # Replace with a secure secret key
 app.config['TESTING'] = False
 
-
+#postgre sql setup
 db_config = {
-    'dbname': 'Project1',
+    'dbname': 'TaskManagement',
     'user': 'postgres',
-    'password': 'TryMe@2020$',
+    'password': 'shaheen1',
     'host': 'localhost',
     'port': '5432'
 }
+
+#mongo setup
+client = MongoClient("mongodb://localhost:27017/")  
+app.config["MONGO_URI"] = "mongodb://localhost:27017"
+db = PyMongo(app)
+
+
+client = MongoClient("mongodb://localhost:27017/")
+db = client.TaskSystem
+tasks = db.tasks
+
 
 def login_required(f):
     @wraps(f)
@@ -81,25 +93,42 @@ def login_post():
         flash('Incorrect password or username. Please try again.', 'error')
         return redirect("/loginView")
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/loginView')
+
 @app.route('/create_account', methods=['POST'])
 def createAccount():
 
-    email = request.form['email']
-    password = request.form['password']
+    try:
+        email = request.form['email']
+        password = request.form['password']
 
-    conn = psycopg2.connect(**db_config)
-    cur = conn.cursor()
+        conn = psycopg2.connect(**db_config)
+        cur = conn.cursor()
 
-    hashedPass=hashPassword(password)
+        hashedPass=hashPassword(password)
 
-    cur.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (email, hashedPass))
-            
-    conn.commit()
-    conn.close()
-  
-    flash('Account created successfully! You can now log in.', 'success')
+        cur.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (email, hashedPass))   
+        conn.commit()
 
-    return redirect('/loginView') 
+        cur.execute("SELECT user_id FROM users WHERE username = %s", (email,))
+        result = cur.fetchone()
+
+        conn.close()
+
+        user_doc = {
+            "userId": result[0],
+            "folders":[]
+        }
+        result = tasks.insert_one(user_doc)
+        flash('Account created successfully! You can now log in.', 'success')
+        return redirect('/loginView') 
+    
+    except Exception as e:
+        flash(f'Account creation failed: {str(e)}', 'error')
+        return redirect('/create_account')
 
 @app.route("/check_email", methods=["POST"])
 def check_email():
@@ -115,12 +144,54 @@ def check_email():
 @login_required
 def getTasks():
     return render_template('index.html')
+  
+@app.route('/add_folder', methods=['POST'])
+def add_folder():
+    try:
+        data = request.get_json() 
+        folder_name = data.get("folderName")
+        new_folder = {
+            "name": folder_name,
+            "tasks": []
+        }
+        user_id = session.get('userId')
+        # Find the user's document by user_id
+        user_document = tasks.find_one({'userId': user_id})
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect('/loginView')
+        if user_document:
+            # Add the new folder to the user's "folders" array
+            user_document['folders'].append(new_folder)
 
+            # Update the user's document in the database
+            tasks.update_one({'userId': user_id}, {"$set": user_document})
+
+            return jsonify({"message": "Folder added successfully!"}), 200
+        else:
+            return jsonify({"error": "User not found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/getFolders', methods=['GET'])
+def list_folders():
+    try:
+        user_id = session.get('userId')
+
+        # Find the user's document by user_id
+        user_document = tasks.find_one({'userId': user_id})
+
+        if user_document:
+            folders = user_document.get('folders', [])
+
+            # Extract just the folder names
+            folder_names = [folder['name'] for folder in folders]
+
+            return jsonify({"folder_names": folder_names})
+        else:
+            return jsonify({"error": "User not found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

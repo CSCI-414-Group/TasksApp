@@ -3,6 +3,7 @@
 {% block head %}
   {{ super() }}
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Create_Login.css') }}">
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 
 {% endblock %}
 {% block content %}
@@ -12,6 +13,22 @@
 <form class = "logout-form" action="/logout" method="get">
   <button type="submit">Logout</button>
 </form>
+
+  <h1>Add a Folder</h1>
+    <form id="addFolderForm">
+        <label for="folder_name">Folder Name:</label>
+        <input type="text" id="folder_name" name="folder_name" required><br><br>
+        <button type="button" id="addFolderButton">Add Folder</button>
+    </form>
+
+    <div id="message"></div>
+
+
+    <h1>User Folders</h1>
+    <ul id="folder-list"></ul>
+
+</body>
+</html>
 {% endblock %}
 
 
