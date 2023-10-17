@@ -8,7 +8,8 @@ from pymongo import MongoClient
 from flask import Flask, render_template
 from functools import wraps
 from bson import ObjectId
-
+from bson import Binary
+import base64
 
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'  # You can choose other options like 'redis' or 'sqlalchemy'
@@ -130,7 +131,7 @@ def createAccount():
         flash(f'Account creation failed: {str(e)}', 'error')
         return redirect('/create_account')
 
-@app.route("/check_email", methods=["POST"])
+@app.route("/checkEmail", methods=["POST"])
 def check_email():
     data = request.get_json()
     email = data.get("email")
@@ -145,7 +146,7 @@ def check_email():
 def getTasks():
     return render_template('index.html')
   
-@app.route('/add_folder', methods=['POST'])
+@app.route('/addFolder', methods=['POST'])
 def add_folder():
     try:
         data = request.get_json() 
@@ -171,6 +172,56 @@ def add_folder():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/addTaskToFolder', methods=['POST'])
+def addTaskToFolder():
+    try:
+        user_id = session.get('userId')
+        folder_name = request.json.get('folder_name')
+        task_name = request.json.get('task_name')
+        task_status = request.json.get('task_status')
+        task_image = request.json.get('task_image')
+
+        if not user_id or not folder_name or not task_name or not task_status:
+            return jsonify({'error': 'Missing required parameters: user_id, folder_name, task_name, task_status'}), 400
+
+       
+
+        user_document = tasks.find_one({'userId': user_id})
+
+        if not user_document:
+            return jsonify({'error': 'User not found'}), 404
+
+        folder_to_update = None
+        for folder in user_document['folders']:
+            if folder['name'] == folder_name:
+                folder_to_update = folder
+                break
+
+        if folder_to_update is None:
+            return jsonify({'error': 'Folder not found'}), 404
+
+        if task_image:
+            # Read and encode the binary data of the image
+            image_data = task_image.read()
+            imageBinary = Binary(image_data)
+
+
+        new_task = {
+            'title': task_name,
+            'status': task_status,
+            'image': task_image,
+            'image_data': imageBinary
+        }
+        
+        folder_to_update['tasks'].append(new_task)
+
+        tasks.update_one({'userId': user_id}, {'$set': {'folders': folder_to_update}})
+
+        return jsonify({'message': 'Task added successfully'}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/getFolders', methods=['GET'])
 def list_folders():

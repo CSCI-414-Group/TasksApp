@@ -9,7 +9,7 @@
 {% block content %}
 <div class = "title-box"> 
   <h1 class="title">Tasks</h1>
-<div/>
+</div>
 <form class = "logout-form" action="/logout" method="get">
   <button type="submit">Logout</button>
 </form>
@@ -26,6 +26,22 @@
 
     <h1>User Folders</h1>
     <ul id="folder-list"></ul>
+
+
+    <h1>Add a Task to a Folder</h1>
+    <form id="addTaskForm" enctype="multipart/form-data">
+        <label for="folder_name">Folder Name:</label>
+        <input type="text" id="folder_names" name="folder_name" required><br><br>
+        <label for="task_name">Task Name:</label>
+        <input type="text" id="task_name" name="task_name" required><br><br>
+        <label for="task_status">Task Status:</label>
+        <input type="text" id="task_status" name="task_status" required><br><br>
+        <label for="task_image">Task Image (Optional):</label>
+        <input type="file" id="task_image" name="task_image"><br><br>
+        <button type="button" id="addTaskButton">Add Task</button>
+    </form>
+    <div id="message2"></div>
+
 
 </body>
 </html>
