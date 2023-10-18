@@ -9,6 +9,7 @@ from flask import Flask, render_template
 from functools import wraps
 from bson import ObjectId
 from bson import Binary
+from flask import jsonify
 import base64
 
 app = Flask(__name__)
