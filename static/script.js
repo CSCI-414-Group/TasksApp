@@ -162,10 +162,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const newTaskNameInput = document.getElementById('newTaskName');
     const newTaskStatusInput = document.getElementById('newTaskStatus');
     const taskListContainer = document.getElementById('task-list');
+    var folderName;
 
     editTaskButtons.forEach(button => {
         button.addEventListener('click', function() {
-            const folderName = prompt('Enter the folder name:');
+            folderName = prompt('Enter the folder name:');
             if (folderName) {
                 fetchTasksForFolder(folderName);
             } else {
@@ -261,6 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error editing task:', error);
             alert('An error occurred while editing the task. Please try again later.');
         });
+        refreshFolderList();
     }
 });
 
