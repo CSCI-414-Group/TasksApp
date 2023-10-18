@@ -26,9 +26,9 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 #postgre sql setup
 db_config = {
-    'dbname': 'TaskManagement',
+    'dbname': 'Project1',
     'user': 'postgres',
-    'password': 'shaheen1',
+    'password': 'TryMe@2020$',
     'host': 'localhost',
     'port': '5432'
 }
