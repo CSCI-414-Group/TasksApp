@@ -11,11 +11,19 @@ from bson import ObjectId
 from bson import Binary
 from flask import jsonify
 import base64
+from PIL import Image
+import io
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'  # You can choose other options like 'redis' or 'sqlalchemy'
 app.secret_key = str(uuid.uuid4())  # Replace with a secure secret key
 app.config['TESTING'] = False
+
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 #postgre sql setup
 db_config = {
@@ -30,12 +38,8 @@ db_config = {
 client = MongoClient("mongodb://localhost:27017/")  
 app.config["MONGO_URI"] = "mongodb://localhost:27017"
 db = PyMongo(app)
-
-
-client = MongoClient("mongodb://localhost:27017/")
 db = client.TaskSystem
 tasks = db.tasks
-
 
 def login_required(f):
     @wraps(f)
@@ -146,7 +150,7 @@ def check_email():
 @login_required
 def getTasks():
     return render_template('index.html')
-  
+
 @app.route('/addFolder', methods=['POST'])
 def add_folder():
     try:
@@ -176,53 +180,78 @@ def add_folder():
     
 @app.route('/addTaskToFolder', methods=['POST'])
 def addTaskToFolder():
-    try:
-        user_id = session.get('userId')
-        folder_name = request.json.get('folder_name')
-        task_name = request.json.get('task_name')
-        task_status = request.json.get('task_status')
-        task_image = request.json.get('task_image')
+    if request.method == 'POST':
 
-        if not user_id or not folder_name or not task_name or not task_status:
-            return jsonify({'error': 'Missing required parameters: user_id, folder_name, task_name, task_status'}), 400
-
-       
-
-        user_document = tasks.find_one({'userId': user_id})
-
-        if not user_document:
-            return jsonify({'error': 'User not found'}), 404
-
+        folder_name = request.form['folder_name']
+        task_name = request.form['task_name']
+        task_status = request.form['status']
+        file = request.files['image']
+        userId = session.get('userId')
+        user_document = tasks.find_one({'userId': userId})
         folder_to_update = None
         for folder in user_document['folders']:
             if folder['name'] == folder_name:
                 folder_to_update = folder
                 break
-
-        if folder_to_update is None:
-            return jsonify({'error': 'Folder not found'}), 404
-
-        if task_image:
-            # Read and encode the binary data of the image
-            image_data = task_image.read()
-            imageBinary = Binary(image_data)
-
-
-        new_task = {
-            'title': task_name,
+    
+        task_data = {
+            'name': task_name,
             'status': task_status,
-            'image': task_image,
-            'image_data': imageBinary
         }
+        if file:
+            task_data['imageFileName'] = file.filename
+            # Save the image to the 'uploads' folder
+            filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+            file.save(filename)
+            # Save image data to MongoDB
+            with open(filename, 'rb') as image_file:
+                image_data = image_file.read()
+            task_data['imageFileData'] = image_data
+            os.remove(filename) 
+             
+        folder_to_update['tasks'].append(task_data)
+        tasks.update_one({'userId': userId}, {'$set': {'folders': user_document['folders']}})  
+    return redirect(url_for('getTasks'))
+
+@app.route('/getFolderTask', methods=['GET'])
+def getAllTasks():
+    try:
+        folder_name = request.args.get('folder_name')
+
+        user_id = session.get('userId')
+
+        # Find the user's document by user_id
+        user_document = tasks.find_one({'userId': user_id})
+
+        if user_document:
+            tasks_with_images = []
+            folderToList = None
+            for folder in user_document['folders']:
+                if folder['name'] == folder_name:
+                    folderToList = folder
+                    break
         
-        folder_to_update['tasks'].append(new_task)
+            for task in folderToList['tasks']:
+                if 'imageFileName' in task and 'imageFileData' in task:
+                    image_file_name = task['imageFileName']
+                    image_data = task['imageFileData']
+                    image_data_base64 = base64.b64encode(image_data).decode('utf-8')
+                     
+                    tasks_with_images.append({
+                        'name': task['name'],
+                        'status': task['status'],
+                        'imageFileName': image_file_name,
+                        'imageFileData': image_data_base64  # Now it's a string
+                    })  
+                else:
+                    tasks_with_images.append(task)
 
-        tasks.update_one({'userId': user_id}, {'$set': {'folders': folder_to_update}})
-
-        return jsonify({'message': 'Task added successfully'}), 200
-
+            return jsonify({"folders": tasks_with_images})
+        else:
+            return jsonify({"error": "User not found"}), 404
+    
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/getFolders', methods=['GET'])
 def list_folders():
@@ -245,5 +274,25 @@ def list_folders():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/removeFolder', methods=['POST'])
+def remove_folder():
+    try:
+        folder_name = request.json.get('folderName')
+        user_id = session.get('userId')  # Get the user's ID
+
+        # Find the user's document by user_id
+        user_document = tasks.find_one({'userId': user_id})
+
+        if user_document:
+            updated_folders = [folder for folder in user_document['folders'] if folder['name'] != folder_name]
+
+            # Update the user document to remove the specified folder
+            tasks.update_one({'userId': user_id}, {'$set': {'folders': updated_folders}})
+
+            return jsonify({"success": True})
+        else:
+            return jsonify({"error": "User not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 if __name__ == '__main__':
     app.run(debug=True)
