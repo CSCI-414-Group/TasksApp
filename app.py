@@ -27,9 +27,9 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 #postgre sql setup
 db_config = {
-    'dbname': 'TaskManagement',
+    'dbname': 'Project1',
     'user': 'postgres',
-    'password': 'shaheen1',
+    'password': 'TryMe@2020$',
     'host': 'localhost',
     'port': '5432'
 }
@@ -294,83 +294,8 @@ def remove_folder():
             return jsonify({"error": "User not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-    
-@app.route('/removeTask', methods=['POST'])
-def remove_task():
-    try:
-        folder_name = request.json.get('folderName')
-        task_name = request.json.get('taskName')
-        user_id = session.get('userId')  # Get the user's ID
 
-        # Find the user's document by user_id
-        user_document = tasks.find_one({'userId': user_id})
-
-        if user_document:
-            # Find the folder by name
-            folder_to_update = None
-            for folder in user_document['folders']:
-                if folder['name'] == folder_name:
-                    folder_to_update = folder
-                    break
-
-            # Remove the specified task from the folder
-            updated_tasks = [task for task in folder_to_update['tasks'] if task['name'] != task_name]
-            folder_to_update['tasks'] = updated_tasks
-
-            # Update the user document in the database
-            tasks.update_one({'userId': user_id}, {'$set': {'folders': user_document['folders']}})
-
-            return jsonify({"success": True})
-        else:
-            return jsonify({"error": "User not found"}), 404
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
-
-# ... (previous imports and configurations)
-
-@app.route('/editTask', methods=['POST'])
-def edit_task():
-    try:
-        folder_name = request.json.get('folderName')
-        old_task_name = request.json.get('oldTaskName')
-        new_task_name = request.json.get('newTaskName')
-        new_task_status = request.json.get('newTaskStatus')
-        user_id = session.get('userId')  # Get the user's ID
-
-        # Find the user's document by user_id
-        user_document = tasks.find_one({'userId': user_id})
-
-        if user_document:
-            # Find the folder by name
-            folder_to_update = None
-            for folder in user_document['folders']:
-                if folder['name'] == folder_name:
-                    folder_to_update = folder
-                    break
-
-            # Find the task by name within the folder
-            for task in folder_to_update['tasks']:
-                if task['name'] == old_task_name:
-                    # Update task details
-                    task['name'] = new_task_name
-                    task['status'] = new_task_status
-
-                    # Update the user document in the database
-                    tasks.update_one({'userId': user_id}, {'$set': {'folders': user_document['folders']}})
-                    return jsonify({"success": True})
-            
-            return jsonify({"error": "Task not found in the specified folder"}), 404
-        else:
-            return jsonify({"error": "User not found"}), 404
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ... (other routes and app.run() statement)
-
+# same as edit tasks
 @app.route('/updateTask', methods=['POST'])
 def update_task():
     try:
@@ -399,6 +324,41 @@ def update_task():
 
             return jsonify({"error": "Task or folder not found"}), 404
 
+        else:
+            return jsonify({"error": "User not found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# removing/deleting tasks function from folder
+@app.route('/removeTask', methods=['POST'])
+def remove_task():
+    try:
+        data = request.get_json()
+        folder_name = data.get('folderName')
+        task_name = data.get('taskName')
+        user_id = session.get('userId')  # Get the user's ID
+
+        # Find the user's document by user_id
+        user_document = tasks.find_one({'userId': user_id})
+
+        if user_document:
+            # Find the folder by name
+            folder_to_update = None
+            for folder in user_document['folders']:
+                if folder['name'] == folder_name:
+                    folder_to_update = folder
+                    break
+
+            # Remove the specified task from the folder
+            updated_tasks = [task for task in folder_to_update['tasks'] if task['name'] != task_name]
+            folder_to_update['tasks'] = updated_tasks
+
+            # Update the user document in the database
+            tasks.update_one({'userId': user_id}, {'$set': {'folders': user_document['folders']}})
+
+            return jsonify({"success": True})
         else:
             return jsonify({"error": "User not found"}), 404
 
