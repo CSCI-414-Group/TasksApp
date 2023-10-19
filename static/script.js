@@ -118,16 +118,36 @@ document.addEventListener("DOMContentLoaded", function () {
     const folderList = document.getElementById('folder-list');
     const taskList = document.getElementById('task-list');
     var folderNameFromClick = "";
-    
-    // Function to create an edit button for a task
+
+
     function createEditButton() {
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
-        editButton.classList.add('edit-task-button');
-        editButton.addEventListener('click', handleTaskEditClick);
+        editButton.classList.add('edit-button');
         return editButton;
     }
-
+    
+    taskList.addEventListener("click", function (event) {
+        const target = event.target;
+    
+        if (target.classList.contains("edit-button")) {
+            // Handle the "Edit" button click event
+            const taskItem = target.closest("div");
+            const folderName = folderNameFromClick; // You can get the folder name from your existing logic
+    
+            // Extract the task title and status from the data attributes
+            const title = taskItem.getAttribute("data-title");
+            const status = taskItem.getAttribute("data-status");
+    
+            console.log(`Edit button clicked for folder: ${folderName}`);
+            console.log(`Task Title: ${title}`);
+            console.log(`Task Status: ${status}`);
+    
+            // You can now implement your code for editing the task here.
+            // You might want to display an edit form or take other actions as needed.
+        }
+    });
+    
     // Add a click event listener to the folder list
     folderList.addEventListener("click", function (event) {
         const target = event.target;
@@ -146,18 +166,23 @@ document.addEventListener("DOMContentLoaded", function () {
                         taskList.innerHTML = ''; // Clear previous tasks
                         data.folders.forEach(task => {
                             const taskItem = document.createElement('div');
-                            taskItem.innerHTML = `Title: ${task.name}<br>Status: ${task.status}`;
-                            if (task.imageFileName && task.imageFileData) {
-                                const downloadLink = document.createElement('a');
-                                downloadLink.href = `data:image/png;base64,${task.imageFileData}`;
-                                downloadLink.download = task.imageFileName;
-                                downloadLink.textContent = `${task.imageFileName}`;
-                                taskItem.appendChild(downloadLink);
-                            }
-                            // Add an edit button for each task
-                            const editButton = createEditButton();
-                            taskItem.appendChild(editButton);
-                            taskList.appendChild(taskItem);
+                            taskItem.innerHTML = `
+                            <div data-title="${task.name}" data-status="${task.status}">
+                                Title: ${task.name}<br>Status: ${task.status}
+                                ${
+                                    task.imageFileName && task.imageFileData
+                                        ? `
+                                            <a href="data:image/png;base64,${task.imageFileData}" download="${task.imageFileName}">
+                                                ${task.imageFileName}
+                                            </a>
+                                        `
+                                        : ''
+                                }
+                                ${createEditButton().outerHTML}
+                            </div>
+                        `;
+
+                        taskList.appendChild(taskItem);
                         });
                     }
                 })
@@ -166,49 +191,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
         }
     });
-    
-    function handleTaskEditClick(event) {
-        const taskItem = event.target.parentElement;
-        const taskItemText = taskItem.textContent;
-    
-        const titleMatch = /Title: (.*?)Status:/.exec(taskItemText);
-        const statusMatch = /Status: (.*)/.exec(taskItemText);
-
-        if (titleMatch && statusMatch) {
-            const oldTaskName = titleMatch[1].trim();
-            const oldTaskStatus = statusMatch[1].trim();
-
-            const newTaskName = prompt('Enter the new task name:', oldTaskName);
-            const newTaskStatus = prompt('Enter the new task status:', oldTaskStatus);
-        }
-
-        fetch('/updateTask', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                folderName: folderNameFromClick,
-                oldTaskName: oldTaskName,
-                newTaskName: newTaskName,
-                newTaskStatus: newTaskStatus
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Task edited successfully!');
-                // You can implement additional logic here, such as updating the UI to reflect the changes.
-            } else {
-                alert('Failed to edit task. Please check your input and try again.');
-            }
-        })
-        .catch(error => {
-            console.error('Error editing task:', error);
-            alert('An error occurred while editing the task. Please try again later.');
-        });
-    
-    }
+       
 
 });
 
