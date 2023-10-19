@@ -117,12 +117,23 @@ document.addEventListener("DOMContentLoaded", function () {
     // Get a reference to the folder list and task list elements
     const folderList = document.getElementById('folder-list');
     const taskList = document.getElementById('task-list');
+    var folderNameFromClick = "";
+    
+    // Function to create an edit button for a task
+    function createEditButton() {
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.classList.add('edit-task-button');
+        editButton.addEventListener('click', handleTaskEditClick);
+        return editButton;
+    }
 
     // Add a click event listener to the folder list
     folderList.addEventListener("click", function (event) {
         const target = event.target;
         if (target.tagName === 'LI') {
             const folderName = target.textContent.replace('Remove', '');
+            folderNameFromClick=folderName
             console.log(folderName);
             // Make an AJAX request to your Python route
             fetch(`/getFolderTask?folder_name=${folderName}`)
@@ -143,6 +154,9 @@ document.addEventListener("DOMContentLoaded", function () {
                                 downloadLink.textContent = `${task.imageFileName}`;
                                 taskItem.appendChild(downloadLink);
                             }
+                            // Add an edit button for each task
+                            const editButton = createEditButton();
+                            taskItem.appendChild(editButton);
                             taskList.appendChild(taskItem);
                         });
                     }
@@ -154,7 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// script.js starts here for editing
+// script.js
 
 document.addEventListener('DOMContentLoaded', function() {
     // Assuming you have an "Edit Task" button in your HTML with class "edit-button"
@@ -216,25 +230,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleTaskEditClick(event) {
-        const taskNameElement = event.target.parentElement.querySelector('.task-name');
-        const taskStatusElement = event.target.parentElement.querySelector('.task-status');
-        const oldTaskName = taskNameElement.textContent;
-        const oldTaskStatus = taskStatusElement.textContent;
+        const taskItem = event.target.parentElement;
+        const taskItemText = taskItem.textContent;
+    
+        const titleMatch = /Title: (.*?)Status:/.exec(taskItemText);
+        const statusMatch = /Status: (.*)/.exec(taskItemText);
 
-        const newTaskName = prompt('Enter the new task name:', oldTaskName);
-        const newTaskStatus = prompt('Enter the new task status:', oldTaskStatus);
+        if (titleMatch && statusMatch) {
+            const oldTaskName = titleMatch[1].trim();
+            const oldTaskStatus = statusMatch[1].trim();
 
-        // Perform the editing logic with folderName, oldTaskName, newTaskName, and newTaskStatus
-        // Send a POST request to save the changes on the server
-        // ...
-
-        // For demonstration purposes, update the UI immediately (without server interaction)
-        if (newTaskName && newTaskStatus) {
-            taskNameElement.textContent = newTaskName;
-            taskStatusElement.textContent = newTaskStatus;
-            alert('Task edited successfully!');
-        } else {
-            alert('Task editing canceled or input invalid.');
+            const newTaskName = prompt('Enter the new task name:', oldTaskName);
+            const newTaskStatus = prompt('Enter the new task status:', oldTaskStatus);
         }
 
         fetch('/updateTask', {
@@ -243,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                folderName: folderName,
+                folderName: folderNameFromClick,
                 oldTaskName: oldTaskName,
                 newTaskName: newTaskName,
                 newTaskStatus: newTaskStatus
@@ -262,99 +269,10 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error editing task:', error);
             alert('An error occurred while editing the task. Please try again later.');
         });
-        refreshFolderList();
+    
     }
+
 });
 
-//Removing tasks from a folder starts here
 
-document.addEventListener('DOMContentLoaded', function() {
-    const getTasksButton = document.getElementById('get-tasks-button');
-    const taskListContainer = document.getElementById('task-list');
-    let folderName; // Define folderName variable in the outer scope
-
-    getTasksButton.addEventListener('click', function() {
-        folderName = document.getElementById('delete-folder-name').value; // Update folderName variable
-        if (folderName) {
-            fetchTasksForFolder(folderName);
-        } else {
-            alert('Please enter a folder name.');
-        }
-    });
-
-    function fetchTasksForFolder(folderName) {
-        // Make a request to fetch tasks for the specified folder
-        fetch(`/getFolderTask?folder_name=${folderName}`)
-            .then(response => response.json())
-            .then(data => {
-                displayTasks(data.folders);
-            })
-            .catch(error => {
-                console.error('Error fetching tasks:', error);
-                alert('An error occurred while fetching tasks. Please try again later.');
-            });
-    }
-
-    function displayTasks(tasks) {
-        // Clear existing tasks from the UI
-        taskListContainer.innerHTML = '';
-
-        // Display tasks in the UI
-        tasks.forEach(task => {
-            const taskItem = document.createElement('li');
-            taskItem.textContent = `Task: ${task.name}, Status: ${task.status}`;
-            taskItem.dataset.taskName = task.name; // Store task name as a data attribute
-            const deleteButton = createDeleteButton(folderName, task.name);
-            taskItem.appendChild(deleteButton);
-            taskListContainer.appendChild(taskItem);
-        });
-    }
-
-    function createDeleteButton(folderName, taskName) {
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete Task';
-        deleteButton.addEventListener('click', function() {
-            if (confirm(`Are you sure you want to delete task: ${taskName}?`)) {
-                // Call the deleteTask function with folderName and taskName
-                deleteTask(folderName, taskName);
-            }
-        });
-        return deleteButton;
-    }
-
-    function deleteTask(folderName, taskName) {
-        fetch('/removeTask', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                folderName: folderName,
-                taskName: taskName
-            })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                alert('Task deleted successfully!');
-                // Find the task item using the data attribute and remove it
-                const taskItemToRemove = document.querySelector(`li[data-taskName="${taskName}"]`);
-                if (taskItemToRemove) {
-                    taskItemToRemove.remove();
-                }
-            } else {
-                alert('Failed to delete task. Please try again.');
-            }
-        })
-        .catch(error => {
-            console.error('Error deleting task:', error);
-            alert('An error occurred while deleting the task. Please try again later.');
-        });
-    }
-});
-
+  

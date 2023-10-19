@@ -18,7 +18,7 @@
     <form id="addFolderForm">
         <label for="folder_name">Folder Name:</label>
         <input type="text" id="folder_name" name="folder_name" required><br><br>
-        <button type="button" id="addFolderButton">Add Folder</button>
+        <button type="button" id="addFolderButton" onclick="addFolderButtonClick()">Add Folder</button>
     </form>
 
     <div id="message"></div>
@@ -42,22 +42,12 @@
     <div id="task-list">
       <!-- Example task item with an edit button -->
       <div class="task-item">
-        <span class="task-name">Edit Tasks</span>
+        <span class="task-name">Task 1</span>
         <button class="edit-button">Edit</button>
       </div>
       <!-- Add more task items here -->
+    </div>
 
-      <!-- Inside the task item -->
-    
-
-    <h1>Delete Tasks from User Folder</h1>
-    <label for="folder_name">Enter Folder Name:</label>
-    <input type="text" id="delete-folder-name" name="folder_name" required>
-    <button type="button" id="get-tasks-button">Get Tasks</button>
-
-  <ul id="task-list">
-      <!-- Tasks will be displayed here -->
-  </ul>
 
 </body>
 </html>
