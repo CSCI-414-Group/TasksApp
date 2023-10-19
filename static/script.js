@@ -118,16 +118,36 @@ document.addEventListener("DOMContentLoaded", function () {
     const folderList = document.getElementById('folder-list');
     const taskList = document.getElementById('task-list');
     var folderNameFromClick = "";
-    
-    // Function to create an edit button for a task
+
+
     function createEditButton() {
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
-        editButton.classList.add('edit-task-button');
-        editButton.addEventListener('click', handleTaskEditClick);
+        editButton.classList.add('edit-button');
         return editButton;
     }
-
+    
+    taskList.addEventListener("click", function (event) {
+        const target = event.target;
+    
+        if (target.classList.contains("edit-button")) {
+            // Handle the "Edit" button click event
+            const taskItem = target.closest("div");
+            const folderName = folderNameFromClick; // You can get the folder name from your existing logic
+    
+            // Extract the task title and status from the data attributes
+            const title = taskItem.getAttribute("data-title");
+            const status = taskItem.getAttribute("data-status");
+    
+            console.log(`Edit button clicked for folder: ${folderName}`);
+            console.log(`Task Title: ${title}`);
+            console.log(`Task Status: ${status}`);
+    
+            // You can now implement your code for editing the task here.
+            // You might want to display an edit form or take other actions as needed.
+        }
+    });
+    
     // Add a click event listener to the folder list
     folderList.addEventListener("click", function (event) {
         const target = event.target;
@@ -146,18 +166,23 @@ document.addEventListener("DOMContentLoaded", function () {
                         taskList.innerHTML = ''; // Clear previous tasks
                         data.folders.forEach(task => {
                             const taskItem = document.createElement('div');
-                            taskItem.innerHTML = `Title: ${task.name}<br>Status: ${task.status}`;
-                            if (task.imageFileName && task.imageFileData) {
-                                const downloadLink = document.createElement('a');
-                                downloadLink.href = `data:image/png;base64,${task.imageFileData}`;
-                                downloadLink.download = task.imageFileName;
-                                downloadLink.textContent = `${task.imageFileName}`;
-                                taskItem.appendChild(downloadLink);
-                            }
-                            // Add an edit button for each task
-                            const editButton = createEditButton();
-                            taskItem.appendChild(editButton);
-                            taskList.appendChild(taskItem);
+                            taskItem.innerHTML = `
+                            <div data-title="${task.name}" data-status="${task.status}">
+                                Title: ${task.name}<br>Status: ${task.status}
+                                ${
+                                    task.imageFileName && task.imageFileData
+                                        ? `
+                                            <a href="data:image/png;base64,${task.imageFileData}" download="${task.imageFileName}">
+                                                ${task.imageFileName}
+                                            </a>
+                                        `
+                                        : ''
+                                }
+                                ${createEditButton().outerHTML}
+                            </div>
+                        `;
+
+                        taskList.appendChild(taskItem);
                         });
                     }
                 })
@@ -168,28 +193,21 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// script.js starts here for editing
+// script.js starts here for editing////////////
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Assuming you have an "Edit Task" button in your HTML with class "edit-button"
-    const editTaskButtons = document.querySelectorAll('.edit-button');
-    const newTaskNameInput = document.getElementById('newTaskName');
-    const newTaskStatusInput = document.getElementById('newTaskStatus');
     const taskListContainer = document.getElementById('task-list');
     var folderName;
 
-    editTaskButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            folderName = prompt('Enter the folder name:');
-            if (folderName) {
-                fetchTasksForFolder(folderName);
-            } else {
-                // User canceled the prompt.
-                alert('Task editing canceled.');
-            }
+    // Enable edit buttons for existing tasks and newly added tasks
+    function enableEditButtons() {
+        const editTaskButtons = document.querySelectorAll('.edit-task-button');
+        editTaskButtons.forEach(button => {
+            button.addEventListener('click', handleTaskEditClick);
         });
-    });
+    }
 
+    // Function to fetch tasks for a specific folder and display them in the UI
     function fetchTasksForFolder(folderName) {
         fetch(`/getFolderTask?folder_name=${folderName}`)
             .then(response => response.json())
@@ -202,77 +220,86 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
+    // Function to display tasks in the UI
     function displayTasks(tasks) {
-        // Clear existing tasks from the UI
-        taskListContainer.innerHTML = '';
+        taskListContainer.innerHTML = ''; // Clear existing tasks from the UI
 
-        // Display tasks in the UI
         tasks.forEach(task => {
             const taskItem = document.createElement('div');
             taskItem.className = 'task-item';
             taskItem.innerHTML = `
                 <span class="task-name">${task.name}</span>
                 <span class="task-status">${task.status}</span>
-                <button class="edit-task-button">Edit Task</button>
+                <button class="edit-task-button">Edit</button>
             `;
             taskListContainer.appendChild(taskItem);
         });
 
-        // Enable edit buttons for newly displayed tasks
-        enableEditButtons();
+        enableEditButtons(); // Enable edit buttons for newly displayed tasks
     }
 
-    function enableEditButtons() {
-        const editTaskButtons = document.querySelectorAll('.edit-task-button');
-        editTaskButtons.forEach(button => {
-            button.addEventListener('click', handleTaskEditClick);
-        });
-    }
-
+    // Function to handle the click event of the Edit button
     function handleTaskEditClick(event) {
         const taskItem = event.target.parentElement;
-        const taskItemText = taskItem.textContent;
+        const taskNameElement = taskItem.querySelector('.task-name');
+        const taskStatusElement = taskItem.querySelector('.task-status');
     
-        const titleMatch = /Title: (.*?)Status:/.exec(taskItemText);
-        const statusMatch = /Status: (.*)/.exec(taskItemText);
+        const oldTaskName = taskNameElement.textContent;
+        const oldTaskStatus = taskStatusElement.textContent;
 
-        if (titleMatch && statusMatch) {
-            const oldTaskName = titleMatch[1].trim();
-            const oldTaskStatus = statusMatch[1].trim();
+        const newTaskName = prompt('Enter the new task name:', oldTaskName);
+        const newTaskStatus = prompt('Enter the new task status:', oldTaskStatus);
 
-            const newTaskName = prompt('Enter the new task name:', oldTaskName);
-            const newTaskStatus = prompt('Enter the new task status:', oldTaskStatus);
-        }
-
-        fetch('/updateTask', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                folderName: folderNameFromClick,
-                oldTaskName: oldTaskName,
-                newTaskName: newTaskName,
-                newTaskStatus: newTaskStatus
+        // Check if user clicked 'Cancel' in the prompt
+        if (newTaskName !== null && newTaskStatus !== null) {
+            fetch('/updateTask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    folderName: folderName,  // Pass the folder name from your logic
+                    oldTaskName: oldTaskName,
+                    newTaskName: newTaskName,
+                    newTaskStatus: newTaskStatus
+                })
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Task edited successfully!');
-                // You can implement additional logic here, such as updating the UI to reflect the changes.
-            } else {
-                alert('Failed to edit task. Please check your input and try again.');
-            }
-        })
-        .catch(error => {
-            console.error('Error editing task:', error);
-            alert('An error occurred while editing the task. Please try again later.');
-        });
-    
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the UI to reflect the changes
+                    taskNameElement.textContent = newTaskName;
+                    taskStatusElement.textContent = newTaskStatus;
+                    alert('Task edited successfully!');
+                } else {
+                    alert('Failed to edit task. Please check your input and try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error editing task:', error);
+                alert('An error occurred while editing the task. Please try again later.');
+            });
+        } else {
+            // User canceled the edit operation
+            alert('Task editing canceled.');
+        }
     }
 
+    // Assuming you have an "Edit Task" button in your HTML with class "edit-task-button"
+    const editTaskButtons = document.querySelectorAll('.edit-task-button');
+    editTaskButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            folderName = prompt('Enter the folder name:');
+            if (folderName) {
+                fetchTasksForFolder(folderName);
+            } else {
+                // User canceled the prompt.
+                alert('Task editing canceled.');
+            }
+        });
+    });
 });
+
 
 //Removing tasks from a folder starts here
 
