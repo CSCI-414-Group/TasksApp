@@ -25,6 +25,64 @@ function checkEmail() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Get the button element by its ID
+    const addButton = document.getElementById('addTask');
+
+    // Add an event listener to the button
+    addButton.addEventListener('click', function () {
+        // Get values from input fields
+        const taskName = document.querySelector('input[name="task_name"]').value;
+        const status = document.querySelector('input[name="status"]').value;
+        const folderName = document.querySelector('input[name="folder_names"]').value;
+        const imageFile = document.querySelector('input[name="image"]').files[0]; // For file input
+
+        if (imageFile) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                    const binaryData = event.target.result; 
+
+                    console.log('Task Name:', taskName);
+                    console.log('Status:', status);
+                    console.log('Folder Name:', folderName);
+                    console.log('Image File:', binaryData);
+                    console.log('Image File name:', imageFile.name);
+                    fetch('/addTaskToFolder', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            folderName: folderName,
+                            taskName: taskName,
+                            status: status,
+                            imageData: binaryData,
+                            fileName: imageFile.name
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Task added successfully!');
+                        } else {
+                            alert('Failed to add the task. Please check your input and try again.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error adding task:', error);
+                        alert('An error occurred while adding the task. Please try again later.');
+                    });
+                
+               
+            }
+            reader.readAsDataURL(imageFile);
+
+        }
+    });
+});
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
     const addFolderForm = document.getElementById('addFolderForm');
     const addFolderButton = document.getElementById('addFolderButton');
     const messageDiv = document.getElementById('message');
@@ -172,7 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                 ${
                                     task.imageFileName && task.imageFileData
                                         ? `
-                                            <a href="data:image/png;base64,${task.imageFileData}" download="${task.imageFileName}">
+                                            <a href="${task.imageFileData}" download="${task.imageFileName}">
                                                 ${task.imageFileName}
                                             </a>
                                         `
@@ -258,14 +316,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const uploadButton = document.getElementById('upload-button');
         const cancelButton = document.getElementById('cancel-button');
         const imageUploadInput = document.getElementById('image-upload-input');
-    
         uploadButton.onclick = function() {
             const file = imageUploadInput.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const newImage = e.target.result; // Base64 encoded image data
-                    updateTaskOnServer(oldTaskName, newTaskName, newTaskStatus, newImage, taskNameElement, taskStatusElement);
+                    updateTaskOnServer(oldTaskName, newTaskName, newTaskStatus, file.name,newImage, taskNameElement, taskStatusElement);
                 };
                 reader.readAsDataURL(file);
             }
@@ -278,21 +335,25 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
     
-    function updateTaskOnServer(oldTaskName, newTaskName, newTaskStatus, newImage) {
-        const data = {
-            folderName: folderName,
-            oldTaskName: oldTaskName,
-            newTaskName: newTaskName,
-            newTaskStatus: newTaskStatus,
-            newImage: newImage
-        };
-    
-        fetch('/updateTask', {
+    function updateTaskOnServer(oldTaskName, newTaskName, newTaskStatus,fileName, newImage,taskNameElement,taskStatusElement) {
+        console.log("image name:"+fileName);
+        console.log("image data:"+newImage);
+
+      
+
+        fetch('/update', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                folderName: folderName,
+                oldTaskName: oldTaskName,
+                newTaskName: newTaskName,
+                newTaskStatus: newTaskStatus,
+                newImage: newImage,
+                fileName: fileName
+            })
         })
         .then(response => response.json())
         .then(data => {

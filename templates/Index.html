@@ -18,7 +18,7 @@
     <form id="addFolderForm">
         <label for="folder_name">Folder Name:</label>
         <input type="text" id="folder_name" name="folder_name" required><br><br>
-        <button type="button" id="addFolderButton" onclick="addFolderButtonClick()">Add Folder</button>
+        <button type="button" id="addFolderButton">Add Folder</button>
     </form>
 
     <div id="message"></div>
@@ -29,14 +29,15 @@
 
     </div>
 
-    <h1>Upload an Image</h1>
-    <form method="POST" enctype="multipart/form-data" action="/addTaskToFolder">
-        <input type="text" name="task_name" placeholder="Task Name">
-        <input type="text" name="status" placeholder="Status">
-        <input type="text" name="folder_name" placeholder="Folder Name">
-        <input type="file" name="image" accept="image/*">
-        <input type="submit" value="Upload">
-    </form>
+        
+    <h1>add task</h1>
+    <form id="addTaskForm">
+      <input type="text" name="task_name" placeholder="Task Name">
+      <input type="text" name="status" placeholder="Status">
+      <input type="text" name="folder_names" placeholder="Folder Name">
+      <input type="file" name="image" accept="image/*">
+      <button type="button" id="addTask">Add task</button>
+  </form>
 
     <ul id="folder-list"></ul>
     <div id="task-list">
@@ -58,9 +59,6 @@
     <!-- Inside your HTML file -->
 
 <!-- Rest of your HTML content -->
-
-<script src="script.js"></script>
-
       <!-- Inside the task item -->
       <!-- Add an empty container for tasks -->
     <div id="task-list"></div>

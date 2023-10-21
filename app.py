@@ -26,10 +26,11 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 #postgre sql setup
+
 db_config = {
-    'dbname': 'Project1',
+    'dbname': 'TaskManagement',
     'user': 'postgres',
-    'password': 'TryMe@2020$',
+    'password': 'shaheen1',
     'host': 'localhost',
     'port': '5432'
 }
@@ -181,11 +182,13 @@ def add_folder():
 @app.route('/addTaskToFolder', methods=['POST'])
 def addTaskToFolder():
     if request.method == 'POST':
-
-        folder_name = request.form['folder_name']
-        task_name = request.form['task_name']
-        task_status = request.form['status']
-        file = request.files['image']
+        data = request.get_json()
+        folder_name = data.get('folderName')
+        task_name = data.get('taskName')
+        task_status = data.get('status')
+        image_data = data.get('imageData')
+        filename = data.get('fileName')
+       
         userId = session.get('userId')
         user_document = tasks.find_one({'userId': userId})
         folder_to_update = None
@@ -198,16 +201,9 @@ def addTaskToFolder():
             'name': task_name,
             'status': task_status,
         }
-        if file:
-            task_data['imageFileName'] = file.filename
-            # Save the image to the 'uploads' folder
-            filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-            file.save(filename)
-            # Save image data to MongoDB
-            with open(filename, 'rb') as image_file:
-                image_data = image_file.read()
+        if image_data:
+            task_data['imageFileName'] = filename
             task_data['imageFileData'] = image_data
-            os.remove(filename) 
              
         folder_to_update['tasks'].append(task_data)
         tasks.update_one({'userId': userId}, {'$set': {'folders': user_document['folders']}})  
@@ -235,13 +231,12 @@ def getAllTasks():
                 if 'imageFileName' in task and 'imageFileData' in task:
                     image_file_name = task['imageFileName']
                     image_data = task['imageFileData']
-                    image_data_base64 = base64.b64encode(image_data).decode('utf-8')
                      
                     tasks_with_images.append({
                         'name': task['name'],
                         'status': task['status'],
                         'imageFileName': image_file_name,
-                        'imageFileData': image_data_base64  # Now it's a string
+                        'imageFileData': image_data  # Now it's a string
                     })  
                 else:
                     tasks_with_images.append(task)
@@ -295,67 +290,24 @@ def remove_folder():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-
-# This is the update/edit function
-# @app.route('/updateTask', methods=['POST'])
-# def update_task():
-#     try:
-#         data = request.get_json()
-#         folder_name = data.get('folderName')
-#         old_task_name = data.get('oldTaskName')
-#         new_task_name = data.get('newTaskName')
-#         new_task_status = data.get('newTaskStatus')
-                
-#         # testing
-#         new_image = data.get('newImage')
-#         user_id = session.get('userId')
-
-#         # Find the user's document by user_id
-#         user_document = tasks.find_one({'userId': user_id})
-
-#         if user_document:
-#             for folder in user_document['folders']:
-#                 if folder['name'] == folder_name:
-#                     for task in folder['tasks']:
-#                         if task['name'] == old_task_name:
-#                             # Update task details
-#                             task['name'] = new_task_name
-#                             task['status'] = new_task_status
-                            
-#                             # testing this as well
-#                             if new_image:
-#                                 task['image'] = new_image
-                                
-#                             # Update the user's document in the database
-#                             tasks.update_one({'userId': user_id}, {'$set': user_document})
-#                             return jsonify({"success": True})
-
-#             return jsonify({"error": "Task or folder not found"}), 404
-
-#         else:
-#             return jsonify({"error": "User not found"}), 404
-
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
-
-app.route('/updateTask', methods=['POST'])
-def update_task():
+@app.route('/update', methods=['POST'])
+def update():
+    print(f"Usernamesss2 in session:{session.get('userId')}")
     try:
         data = request.get_json()
         folder_name = data.get('folderName')
         old_task_name = data.get('oldTaskName')
         new_task_name = data.get('newTaskName')
         new_task_status = data.get('newTaskStatus')
-                        
-        # testing
         new_image = data.get('newImage')
-        user_id = session.get('userId')
+        filename = data.get('fileName')
+        user_id = session.get('userId')  # Get the user's ID
 
         # Find the user's document by user_id
         user_document = tasks.find_one({'userId': user_id})
 
         if user_document:
-            for folder in user_document['folders']:
+             for folder in user_document['folders']:
                 if folder['name'] == folder_name:
                     for task in folder['tasks']:
                         if task['name'] == old_task_name:
@@ -365,28 +317,17 @@ def update_task():
                             
                             # testing this as well
                             if new_image:
-                                task['image'] = new_image.filename
-                                
-                                filename = os.path.join(app.config['UPLOAD_FOLDER'], new_image.filename)
-                                new_image.save(filename)
-                                # Save image data to MongoDB
-                                with open(filename, 'rb') as image_file:
-                                    image_data = image_file.read()
-                                tasks['image'] = image_data
-                                os.remove(filename)
+                                task['imageFileName'] = filename
+                                task['imageFileData'] = new_image
                                 
                             # Update the user's document in the database
                             tasks.update_one({'userId': user_id}, {'$set': user_document})
                             return jsonify({"success": True})
-
-            return jsonify({"error": "Task or folder not found"}), 404
-
         else:
             return jsonify({"error": "User not found"}), 404
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 # removing/deleting tasks function from folder
 @app.route('/removeTask', methods=['POST'])
