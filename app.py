@@ -294,9 +294,51 @@ def remove_folder():
             return jsonify({"error": "User not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
 
-# same as edit tasks
-@app.route('/updateTask', methods=['POST'])
+# This is the update/edit function
+# @app.route('/updateTask', methods=['POST'])
+# def update_task():
+#     try:
+#         data = request.get_json()
+#         folder_name = data.get('folderName')
+#         old_task_name = data.get('oldTaskName')
+#         new_task_name = data.get('newTaskName')
+#         new_task_status = data.get('newTaskStatus')
+                
+#         # testing
+#         new_image = data.get('newImage')
+#         user_id = session.get('userId')
+
+#         # Find the user's document by user_id
+#         user_document = tasks.find_one({'userId': user_id})
+
+#         if user_document:
+#             for folder in user_document['folders']:
+#                 if folder['name'] == folder_name:
+#                     for task in folder['tasks']:
+#                         if task['name'] == old_task_name:
+#                             # Update task details
+#                             task['name'] = new_task_name
+#                             task['status'] = new_task_status
+                            
+#                             # testing this as well
+#                             if new_image:
+#                                 task['image'] = new_image
+                                
+#                             # Update the user's document in the database
+#                             tasks.update_one({'userId': user_id}, {'$set': user_document})
+#                             return jsonify({"success": True})
+
+#             return jsonify({"error": "Task or folder not found"}), 404
+
+#         else:
+#             return jsonify({"error": "User not found"}), 404
+
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+
+app.route('/updateTask', methods=['POST'])
 def update_task():
     try:
         data = request.get_json()
@@ -304,6 +346,9 @@ def update_task():
         old_task_name = data.get('oldTaskName')
         new_task_name = data.get('newTaskName')
         new_task_status = data.get('newTaskStatus')
+                        
+        # testing
+        new_image = data.get('newImage')
         user_id = session.get('userId')
 
         # Find the user's document by user_id
@@ -317,7 +362,19 @@ def update_task():
                             # Update task details
                             task['name'] = new_task_name
                             task['status'] = new_task_status
-
+                            
+                            # testing this as well
+                            if new_image:
+                                task['image'] = new_image.filename
+                                
+                                filename = os.path.join(app.config['UPLOAD_FOLDER'], new_image.filename)
+                                new_image.save(filename)
+                                # Save image data to MongoDB
+                                with open(filename, 'rb') as image_file:
+                                    image_data = image_file.read()
+                                tasks['image'] = image_data
+                                os.remove(filename)
+                                
                             # Update the user's document in the database
                             tasks.update_one({'userId': user_id}, {'$set': user_document})
                             return jsonify({"success": True})
