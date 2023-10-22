@@ -205,7 +205,6 @@ def add_folder():
 @app.route('/addTaskToFolder', methods=['POST'])
 def addTaskToFolder():
     try:
-    try:
         data = request.get_json()
         folder_name = data.get('folderName')
         task_name = data.get('taskName')
