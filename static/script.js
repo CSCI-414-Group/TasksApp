@@ -39,48 +39,52 @@ document.addEventListener('DOMContentLoaded', function () {
         if (imageFile) {
             const reader = new FileReader();
             reader.onload = function(event) {
-                    const binaryData = event.target.result; 
-
-                    console.log('Task Name:', taskName);
-                    console.log('Status:', status);
-                    console.log('Folder Name:', folderName);
-                    console.log('Image File:', binaryData);
-                    console.log('Image File name:', imageFile.name);
-                    fetch('/addTaskToFolder', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            folderName: folderName,
-                            taskName: taskName,
-                            status: status,
-                            imageData: binaryData,
-                            fileName: imageFile.name
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Task added successfully!');
-                        } else {
-                            alert('Failed to add the task. Please check your input and try again.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error adding task:', error);
-                        alert('An error occurred while adding the task. Please try again later.');
-                    });
-                
+                const binaryData = event.target.result; 
+                addTaskToServer(taskName, status, folderName, binaryData, imageFile);
                
             }
             reader.readAsDataURL(imageFile);
 
         }
+        else{
+            addTaskToServer(taskName, status, folderName, null, null);
+        }
     });
 });
 
-
+function addTaskToServer(taskName, status, folderName, binaryData, imageFile){
+    var fileName;
+    if (!imageFile){
+        fileName = null 
+    }else{
+        fileName=imageFile.name;
+    }
+    fetch('/addTaskToFolder', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            folderName: folderName,
+            taskName: taskName,
+            status: status,
+            imageData: binaryData,
+            fileName: fileName
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Task added successfully!');
+        } else {
+            alert('Failed to add the task. Please check your input and try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error adding task:', error);
+        alert('An error occurred while adding the task. Please try again later.');
+    });
+}
 
 document.addEventListener('DOMContentLoaded', function () {
     const addFolderForm = document.getElementById('addFolderForm');
@@ -170,42 +174,165 @@ document.addEventListener('DOMContentLoaded', function () {
     refreshFolderList();
 });
 
-
+//get folder list when clicked and attach edit button and remove buttons to it
 document.addEventListener("DOMContentLoaded", function () {
     // Get a reference to the folder list and task list elements
     const folderList = document.getElementById('folder-list');
     const taskList = document.getElementById('task-list');
     var folderNameFromClick = "";
 
+    function createDeleteButton(taskName, taskItem) {
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete Task';
+        deleteButton.classList.add('delete-button');
+        deleteButton.addEventListener('click', function(event) {
+            if (confirm(`Are you sure you want to delete task: ${taskName}?`)) {
+                // Call the deleteTask function with folderName and taskName
+                deleteTask(folderNameFromClick, taskName, taskItem);
+            }
+        });
+        taskItem.appendChild(deleteButton);
+    }
 
-    function createEditButton() {
+    function deleteTask(folderName, taskName, taskItem) {
+        fetch('/removeTask', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                folderName: folderName,
+                taskName: taskName
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                alert('Failed to delete task. Please try again.');
+               
+                
+            } else {
+                taskItem.remove();            
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting task:', error);
+            alert('An error occurred while deleting the task. Please try again later.');
+        });
+    }
+
+    function createEditButton(taskItem) {
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
         editButton.classList.add('edit-button');
-        return editButton;
+
+        editButton.addEventListener("click", function (event) {
+            const taskItem = event.target.parentElement;
+            const taskNameElement = taskItem.getAttribute('data-title');
+            const taskStatusElement = taskItem.getAttribute('data-status');
+            
+            const oldTaskName = taskNameElement;
+            const oldTaskStatus = taskStatusElement;
+            
+            const newTaskName = prompt('Enter the new task name:', oldTaskName);
+            const newTaskStatus = prompt('Enter the new task status:', oldTaskStatus);
+    
+            const modal = document.getElementById('custom-modal');
+            modal.style.display = 'block';
+        
+            const uploadButton = document.getElementById('upload-button');
+            const cancelButton = document.getElementById('cancel-button');
+            const imageUploadInput = document.getElementById('image-upload-input');
+            uploadButton.onclick = function() {
+                const file = imageUploadInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const newImage = e.target.result; // Base64 encoded image data
+                        updateTaskOnServer(taskItem, oldTaskName, newTaskName, newTaskStatus, file.name,newImage, taskNameElement, taskStatusElement);
+                    };
+                    reader.readAsDataURL(file);
+                }
+                else{
+                    updateTaskOnServer(taskItem, oldTaskName, newTaskName, newTaskStatus, null,null, taskNameElement, taskStatusElement);
+                }
+                modal.style.display = 'none';
+            };
+        
+            cancelButton.onclick = function() {
+                modal.style.display = 'none';
+                updateTaskOnServer(taskItem, oldTaskName, newTaskName, newTaskStatus, null, null, taskNameElement, taskStatusElement);
+            };
+            
+        });
+
+        taskItem.appendChild(editButton);
     }
-    
-    taskList.addEventListener("click", function (event) {
-        const target = event.target;
-    
-        if (target.classList.contains("edit-button")) {
-            // Handle the "Edit" button click event
-            const taskItem = target.closest("div");
-            const folderName = folderNameFromClick; // You can get the folder name from your existing logic
-    
-            // Extract the task title and status from the data attributes
-            const title = taskItem.getAttribute("data-title");
-            const status = taskItem.getAttribute("data-status");
-    
-            console.log(`Edit button clicked for folder: ${folderName}`);
-            console.log(`Task Title: ${title}`);
-            console.log(`Task Status: ${status}`);
-    
-            // You can now implement your code for editing the task here.
-            // You might want to display an edit form or take other actions as needed.
-        }
-    });
-    
+
+    function updateTaskOnServer(taskItem, oldTaskName, newTaskName, newTaskStatus,fileName, newImage,taskNameElement,taskStatusElement) {
+        console.log("image name:"+fileName);
+        console.log("image data:"+newImage);
+        fetch('/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                folderName: folderNameFromClick,
+                oldTaskName: oldTaskName,
+                newTaskName: newTaskName,
+                newTaskStatus: newTaskStatus,
+                newImage: newImage,
+                fileName: fileName
+            })
+        })
+        .then(response => response.json())
+        .then(result  => {
+            if (result .error) {
+                alert('Failed to edit task. Please check your input and try again.');
+            } else {
+                 // Update the UI to reflect the changes
+                 const newTaskDocument = result.updated_data;
+                 console.log('Task updated:', newTaskDocument);
+                 const newTaskName = newTaskDocument.name;
+                 const newTaskStatus = newTaskDocument.status;
+                 console.log('Task status:', newTaskStatus);
+                 console.log('Task status test:', result.updated_data.status);
+
+                 const newImage = newTaskDocument.imageFileData;
+                 const fileName = newTaskDocument.imageFileName;
+                 taskItem.setAttribute('data-title', newTaskName);
+                 taskItem.setAttribute('data-status', newTaskStatus);
+                 taskItem.innerHTML = `
+                             <div">
+                                 Title: ${newTaskName}<br>Status: ${newTaskStatus}
+                                 ${
+                                     newImage && fileName
+                                         ? `
+                                             <a href="${newImage}" download="${fileName}">
+                                                 ${fileName}
+                                             </a>
+                                         `
+                                         : ''
+                                 }
+                             </div>
+                         `;
+                taskList.appendChild(taskItem);
+                createEditButton(taskItem);
+                createDeleteButton(newTaskName, taskItem);
+                 alert('Task edited successfully!');
+            }
+        })
+        .catch(error => {
+            console.error('Error editing task:', error);
+            alert('An error occurred while editing the task. Please try again later.');
+        });
+    }
     // Add a click event listener to the folder list
     folderList.addEventListener("click", function (event) {
         const target = event.target;
@@ -224,8 +351,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         taskList.innerHTML = ''; // Clear previous tasks
                         data.folders.forEach(task => {
                             const taskItem = document.createElement('div');
+                            taskItem.setAttribute('data-title', task.name); // Add data-title attribute
+                            taskItem.setAttribute('data-status', task.status);
                             taskItem.innerHTML = `
-                            <div data-title="${task.name}" data-status="${task.status}">
+                            <div">
                                 Title: ${task.name}<br>Status: ${task.status}
                                 ${
                                     task.imageFileName && task.imageFileData
@@ -236,11 +365,11 @@ document.addEventListener("DOMContentLoaded", function () {
                                         `
                                         : ''
                                 }
-                                ${createEditButton().outerHTML}
                             </div>
                         `;
-
                         taskList.appendChild(taskItem);
+                        createEditButton(taskItem);
+                        createDeleteButton(task.name, taskItem);
                         });
                     }
                 })
@@ -249,234 +378,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
         }
     });
+
 });
 
-
-// script.js starts here for editing/updating task////////////
-
-document.addEventListener('DOMContentLoaded', function() {
-    const taskListContainer = document.getElementById('task-list');
-    var folderName;
-    let taskNameElement;
-    let taskStatusElement;
-
-    // Enable edit buttons for existing tasks and newly added tasks
-    function enableEditButtons() {
-        const editTaskButtons = document.querySelectorAll('.edit-task-button');
-        editTaskButtons.forEach(button => {
-            button.addEventListener('click', handleTaskEditClick);
-        });
-    }
-
-    // Function to fetch tasks for a specific folder and display them in the UI
-    function fetchTasksForFolder(folderName) {
-        fetch(`/getFolderTask?folder_name=${folderName}`)
-            .then(response => response.json())
-            .then(data => {
-                displayTasks(data.folders);
-            })
-            .catch(error => {
-                console.error('Error fetching tasks:', error);
-                alert('An error occurred while fetching tasks. Please try again later.');
-            });
-    }
-
-    // Function to display tasks in the UI
-    function displayTasks(tasks) {
-        taskListContainer.innerHTML = ''; // Clear existing tasks from the UI
-
-        tasks.forEach(task => {
-            const taskItem = document.createElement('div');
-            taskItem.className = 'task-item';
-            taskItem.innerHTML = `
-                <span class="task-name">${task.name}</span>
-                <span class="task-status">${task.status}</span>
-                <button class="edit-task-button">Edit</button>
-            `;
-            taskListContainer.appendChild(taskItem);
-        });
-
-        enableEditButtons(); // Enable edit buttons for newly displayed tasks
-    }
-
-    function handleTaskEditClick(event) {
-        const taskItem = event.target.parentElement;
-        const taskNameElement = taskItem.querySelector('.task-name');
-        const taskStatusElement = taskItem.querySelector('.task-status');
-        
-        const oldTaskName = taskNameElement.textContent;
-        const oldTaskStatus = taskStatusElement.textContent;
-        
-        const newTaskName = prompt('Enter the new task name:', oldTaskName);
-        const newTaskStatus = prompt('Enter the new task status:', oldTaskStatus);
-
-        const modal = document.getElementById('custom-modal');
-        modal.style.display = 'block';
-    
-        const uploadButton = document.getElementById('upload-button');
-        const cancelButton = document.getElementById('cancel-button');
-        const imageUploadInput = document.getElementById('image-upload-input');
-        uploadButton.onclick = function() {
-            const file = imageUploadInput.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const newImage = e.target.result; // Base64 encoded image data
-                    updateTaskOnServer(oldTaskName, newTaskName, newTaskStatus, file.name,newImage, taskNameElement, taskStatusElement);
-                };
-                reader.readAsDataURL(file);
-            }
-            modal.style.display = 'none';
-        };
-    
-        cancelButton.onclick = function() {
-            modal.style.display = 'none';
-            updateTaskOnServer(oldTaskName, newTaskName, newTaskStatus, null, taskNameElement, taskStatusElement);
-        };
-    }
-    
-    function updateTaskOnServer(oldTaskName, newTaskName, newTaskStatus,fileName, newImage,taskNameElement,taskStatusElement) {
-        console.log("image name:"+fileName);
-        console.log("image data:"+newImage);
-
-      
-
-        fetch('/update', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                folderName: folderName,
-                oldTaskName: oldTaskName,
-                newTaskName: newTaskName,
-                newTaskStatus: newTaskStatus,
-                newImage: newImage,
-                fileName: fileName
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Update the UI to reflect the changes
-                taskNameElement.textContent = newTaskName;
-                taskStatusElement.textContent = newTaskStatus;
-                alert('Task edited successfully!');
-            } else {
-                alert('Failed to edit task. Please check your input and try again.');
-            }
-        })
-        .catch(error => {
-            console.error('Error editing task:', error);
-            alert('An error occurred while editing the task. Please try again later.');
-        });
-    }
-
-
-    // Assuming you have an "Edit Task" button in your HTML with class "edit-task-button"
-    const editTaskButtons = document.querySelectorAll('.edit-task-button');
-    editTaskButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            folderName = prompt('Enter the folder name:');
-            if (folderName) {
-                fetchTasksForFolder(folderName);
-            } else {
-                // User canceled the prompt.
-                alert('Task editing canceled.');
-            }
-        });
-    });
-});
-
-//Removing/deleting tasks from a folder starts here////////////////////////////////////////////////////
-
-document.addEventListener('DOMContentLoaded', function() {
-    const getTasksButton = document.getElementById('get-tasks-button');
-    const taskListContainer = document.getElementById('task-list');
-    let folderName; // Define folderName variable in the outer scope
-
-    getTasksButton.addEventListener('click', function() {
-        folderName = document.getElementById('delete-folder-name').value; // Update folderName variable
-        if (folderName) {
-            fetchTasksForFolder(folderName);
-        } else {
-            alert('Please enter a folder name.');
-        }
-    });
-
-    function fetchTasksForFolder(folderName) {
-        // Make a request to fetch tasks for the specified folder
-        fetch(`/getFolderTask?folder_name=${folderName}`)
-            .then(response => response.json())
-            .then(data => {
-                displayTasks(data.folders);
-            })
-            .catch(error => {
-                console.error('Error fetching tasks:', error);
-                alert('An error occurred while fetching tasks. Please try again later.');
-            });
-    }
-
-    function displayTasks(tasks) {
-        // Clear existing tasks from the UI
-        taskListContainer.innerHTML = '';
-
-        // Display tasks in the UI
-        tasks.forEach(task => {
-            const taskItem = document.createElement('li');
-            taskItem.textContent = `Task: ${task.name}, Status: ${task.status}`;
-            taskItem.dataset.taskName = task.name; // Store task name as a data attribute
-            const deleteButton = createDeleteButton(folderName, task.name);
-            taskItem.appendChild(deleteButton);
-            taskListContainer.appendChild(taskItem);
-        });
-    }
-
-    function createDeleteButton(folderName, taskName) {
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete Task';
-        deleteButton.addEventListener('click', function() {
-            if (confirm(`Are you sure you want to delete task: ${taskName}?`)) {
-                // Call the deleteTask function with folderName and taskName
-                deleteTask(folderName, taskName);
-            }
-        });
-        return deleteButton;
-    }
-
-    function deleteTask(folderName, taskName) {
-        fetch('/removeTask', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                folderName: folderName,
-                taskName: taskName
-            })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                alert('Task deleted successfully!');
-                // Find the task item using the data attribute and remove it
-                const taskItemToRemove = document.querySelector(`li[data-taskName="${taskName}"]`);
-                if (taskItemToRemove) {
-                    taskItemToRemove.remove();
-                }
-            } else {
-                alert('Failed to delete task. Please try again.');
-            }
-        })
-        .catch(error => {
-            console.error('Error deleting task:', error);
-            alert('An error occurred while deleting the task. Please try again later.');
-        });
-    }
-});
 

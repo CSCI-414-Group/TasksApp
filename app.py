@@ -20,11 +20,6 @@ app.config['SESSION_TYPE'] = 'filesystem'  # You can choose other options like '
 app.secret_key = str(uuid.uuid4())  # Replace with a secure secret key
 app.config['TESTING'] = False
 
-UPLOAD_FOLDER = 'uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-
 #postgre sql setup
 
 db_config = {
@@ -57,7 +52,6 @@ def hashPassword(password):
     return hash_result
 
 def email_exists(email):
-
     conn = psycopg2.connect(**db_config)
     cur = conn.cursor()
     cur.execute("SELECT COUNT(*) FROM users WHERE username = %s", (email,))
@@ -107,7 +101,6 @@ def logout():
 
 @app.route('/create_account', methods=['POST'])
 def createAccount():
-
     try:
         email = request.form['email']
         password = request.form['password']
@@ -181,22 +174,29 @@ def add_folder():
     
 @app.route('/addTaskToFolder', methods=['POST'])
 def addTaskToFolder():
-    if request.method == 'POST':
+    try:
         data = request.get_json()
         folder_name = data.get('folderName')
         task_name = data.get('taskName')
         task_status = data.get('status')
         image_data = data.get('imageData')
         filename = data.get('fileName')
-       
+
         userId = session.get('userId')
         user_document = tasks.find_one({'userId': userId})
         folder_to_update = None
-        for folder in user_document['folders']:
+
+        if user_document is None:
+            return jsonify({"message": "User not found."}), 404
+
+        for folder in user_document.get('folders', []):
             if folder['name'] == folder_name:
                 folder_to_update = folder
                 break
-    
+
+        if folder_to_update is None:
+            return jsonify({"message": "Folder not found."}), 404
+
         task_data = {
             'name': task_name,
             'status': task_status,
@@ -204,10 +204,14 @@ def addTaskToFolder():
         if image_data:
             task_data['imageFileName'] = filename
             task_data['imageFileData'] = image_data
-             
+
         folder_to_update['tasks'].append(task_data)
-        tasks.update_one({'userId': userId}, {'$set': {'folders': user_document['folders']}})  
-    return redirect(url_for('getTasks'))
+        tasks.update_one({'userId': userId}, {'$set': {'folders': user_document['folders']}})
+        return jsonify({"message": "task added successfully!", "success":True})
+
+    except Exception as e:
+        return jsonify({"message": "An error occurred: " + str(e)}), 500
+
 
 @app.route('/getFolderTask', methods=['GET'])
 def getAllTasks():
@@ -292,7 +296,6 @@ def remove_folder():
     
 @app.route('/update', methods=['POST'])
 def update():
-    print(f"Usernamesss2 in session:{session.get('userId')}")
     try:
         data = request.get_json()
         folder_name = data.get('folderName')
@@ -303,9 +306,15 @@ def update():
         filename = data.get('fileName')
         user_id = session.get('userId')  # Get the user's ID
 
+        newTaskDocument = {
+            'name': None,
+            'status': None,
+            'imageFileName': None,
+            'imageFileData': None
+        }
+
         # Find the user's document by user_id
         user_document = tasks.find_one({'userId': user_id})
-
         if user_document:
              for folder in user_document['folders']:
                 if folder['name'] == folder_name:
@@ -319,10 +328,19 @@ def update():
                             if new_image:
                                 task['imageFileName'] = filename
                                 task['imageFileData'] = new_image
-                                
+                                newTaskDocument['name']=task['name']
+                                newTaskDocument['status']= task['status']
+                                newTaskDocument['imageFileName']=filename
+                                newTaskDocument['imageFileData']=new_image
+                            else:
+                                newTaskDocument['name']=task['name']
+                                newTaskDocument['status']= task['status']
+                                newTaskDocument['imageFileName']=task['imageFileName']
+                                newTaskDocument['imageFileData']=task['imageFileData']
                             # Update the user's document in the database
                             tasks.update_one({'userId': user_id}, {'$set': user_document})
-                            return jsonify({"success": True})
+                            return jsonify({"updated_data": newTaskDocument})
+
         else:
             return jsonify({"error": "User not found"}), 404
 
