@@ -28,9 +28,9 @@ if not os.path.exists(UPLOAD_FOLDER):
 #postgre sql setup
 
 db_config = {
-    'dbname': 'TaskManagement',
+    'dbname': 'Project1',
     'user': 'postgres',
-    'password': 'shaheen1',
+    'password': 'TryMe@2020$',
     'host': 'localhost',
     'port': '5432'
 }
@@ -179,24 +179,61 @@ def add_folder():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+# @app.route('/addTaskToFolder', methods=['POST'])
+# def addTaskToFolder():
+#     if request.method == 'POST':
+#         data = request.get_json()
+#         folder_name = data.get('folderName')
+#         task_name = data.get('taskName')
+#         task_status = data.get('status')
+#         image_data = data.get('imageData')
+#         filename = data.get('fileName')
+       
+#         userId = session.get('userId')
+#         user_document = tasks.find_one({'userId': userId})
+#         folder_to_update = None
+#         for folder in user_document['folders']:
+#             if folder['name'] == folder_name:
+#                 folder_to_update = folder
+#                 break
+    
+#         task_data = {
+#             'name': task_name,
+#             'status': task_status,
+#         }
+#         if image_data:
+#             task_data['imageFileName'] = filename
+#             task_data['imageFileData'] = image_data
+             
+#         folder_to_update['tasks'].append(task_data)
+#         tasks.update_one({'userId': userId}, {'$set': {'folders': user_document['folders']}})  
+#     return redirect(url_for('getTasks'))
+
 @app.route('/addTaskToFolder', methods=['POST'])
 def addTaskToFolder():
-    if request.method == 'POST':
+    try:
         data = request.get_json()
         folder_name = data.get('folderName')
         task_name = data.get('taskName')
         task_status = data.get('status')
         image_data = data.get('imageData')
         filename = data.get('fileName')
-       
+
         userId = session.get('userId')
         user_document = tasks.find_one({'userId': userId})
         folder_to_update = None
-        for folder in user_document['folders']:
+
+        if user_document is None:
+            return jsonify({"message": "User not found."}), 404
+
+        for folder in user_document.get('folders', []):
             if folder['name'] == folder_name:
                 folder_to_update = folder
                 break
-    
+
+        if folder_to_update is None:
+            return jsonify({"message": "Folder not found."}), 404
+
         task_data = {
             'name': task_name,
             'status': task_status,
@@ -204,10 +241,13 @@ def addTaskToFolder():
         if image_data:
             task_data['imageFileName'] = filename
             task_data['imageFileData'] = image_data
-             
+
         folder_to_update['tasks'].append(task_data)
-        tasks.update_one({'userId': userId}, {'$set': {'folders': user_document['folders']}})  
-    return redirect(url_for('getTasks'))
+        tasks.update_one({'userId': userId}, {'$set': {'folders': user_document['folders']}})
+        return jsonify({"message": "task added successfully!", "success":True})
+
+    except Exception as e:
+        return jsonify({"message": "An error occurred: " + str(e)}), 500
 
 @app.route('/getFolderTask', methods=['GET'])
 def getAllTasks():
