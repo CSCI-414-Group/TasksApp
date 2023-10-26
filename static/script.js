@@ -387,8 +387,8 @@ document.addEventListener("DOMContentLoaded", function () {
                             if (task.imageFileData) {
                                 // Include the image with a downloadable link
                                 taskDetailsHTML += `
-                                    <p>Image: <a href="${task.imageFileData}" download="${task.imageFileName}">
-                                        <img src="${task.imageFileData}" alt="${task.imageFileName}" />
+                                    <p>Image: <a href="data:image/png;base64,${task.imageFileData}" download="${task.imageFileName}">
+                                        <img alt="${task.imageFileName}" />
                                     </a>`;
                             }
                         
