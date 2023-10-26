@@ -1,0 +1,341 @@
+/* General styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #333; /* Dark background color */
+    color: #eee; /* Light text color */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100vh;
+    margin: 0;
+}
+
+.title-box {
+    background-color: #000000; 
+    text-align: center;
+    padding: 10px 0;
+    box-shadow: 3px 0 5px rgba(255, 255, 255, 0.2); /* White box shadow */
+}
+
+/* Style the "Tasks" title */
+.title {
+    color: #666666; /* Orange text color */
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Sidebar styles */
+.sidebar {
+    background-color: #000000; 
+    width: 250px;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: 3px 0 5px rgba(255, 255, 255, 0.2); /* White box shadow */
+}
+
+/* Content styles */
+.content {
+    width: 1000px;
+    padding: 20px;
+}
+
+.sidebar h1 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #8a8a8a;
+}
+
+.sidebar form {
+    margin-bottom: 20px;
+
+}
+
+/* Adjust the styles for the folder list items within the sidebar */
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+}
+
+/* Use flexbox to create space between folder name and the "Remove" button */
+.sidebar ul li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+}
+
+/* Style the "Remove" button */
+.sidebar ul li button {
+    background-color: #ff3333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.sidebar ul li button:hover {
+    background-color: #d91c1c;
+}
+
+.sidebar form {
+    margin-bottom: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+}
+
+/* Style the "Add Folder" button */
+#addFolderButton {
+    margin-top: -35px;
+    margin-left: auto;
+    display: block;
+    background-color: #33adff;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px 20px;
+    transition: background-color 0.3s;
+}
+
+#folder_name {
+    width: 96.5%;
+    background-color: #b8b8b8;
+}
+
+#addFolderButton:hover {
+    background-color: #1c87d9;
+}
+
+#addTaskButton {
+    position: absolute;
+    top: 10px;
+    right: 115px;
+    background-color: #33adff;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px 20px;
+    transition: background-color 0.3s;
+}
+
+#addTaskButton:hover {
+    background-color: #1c87d9;
+}
+
+/* Logout button styles */
+.logout-form {
+    position: absolute;
+    top: 0px;
+    right: 10px;
+    display: block;
+    margin-top: 10px;
+    float: right;
+}
+
+.logout-form button {
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.logout-form button:hover {
+    background-color: #45a049;
+}
+
+/* User Folders list styles */
+#folder-list {
+    list-style: none;
+    padding: 0;
+}
+
+#folder-list li {
+    color: #eee; /* Light text color */
+    font-weight: bold;
+    margin: 10px 0;
+    cursor: pointer;
+}
+
+#footer {
+    background-color: #000000; /* Dark blue background color */
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1); /* White box shadow */
+    color: #eee;
+    text-align: center;
+    padding: 20px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: center;
+}
+
+#footer a {
+    text-decoration: none;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+#footer a:hover {
+    color: #00f;
+}
+
+/* Style the task status columns */
+#status-column-pending {
+    width: 30%;
+    box-shadow: 3px 0 5px rgba(255, 255, 255, 0.2); /* White box shadow */
+    display: inline-block;
+    vertical-align: top;
+    margin: 1%;
+    background-color: #ff4800;
+    text-align: center;
+    color: #000000;
+}
+
+#status-column-pending ul {
+    text-align: left;
+}
+
+#status-column-in-progress {
+    box-shadow: 3px 0 5px rgba(255, 255, 255, 0.2); /* White box shadow */
+    width: 30%;
+    display: inline-block;
+    vertical-align: top;
+    margin: 1%;
+    background-color: #19beff;
+    text-align: center;
+    color: #000000;
+}
+
+#status-column-in-progress ul {
+    text-align: left;
+}
+
+#status-column-completed {
+    box-shadow: 3px 0 5px rgba(255, 255, 255, 0.2); /* White box shadow */
+    width: 30%;
+    display: inline-block;
+    vertical-align: top;
+    margin: 1%;
+    background-color: #7cfc00;
+    text-align: center;
+    color: #000000;
+}
+
+#status-column-completed ul {
+    text-align: left;
+}
+
+.popup {
+    color: #8a8a8a;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1;
+}
+
+.popup-content {
+    background-color: #000000;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.delete-button {
+    background-color: #ff3333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.delete-button:hover {
+    background-color: #d91c1c;
+}
+
+.edit-button {
+    background-color: #ffcc00;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.edit-button:hover {
+    background-color: #e5b800;
+}
+
+/* Style the dark mode toggle button and its container */
+.button-container {
+    position: absolute;
+    top: 10px;
+    right: 240px;
+    display: flex;
+    align-items: center;
+}
+
+#darkModeButton {
+    position: absolute;
+    top: 10px;
+    right: 240px;
+    background-color: #000000; /* Dark background color */
+    color: #fff; /* Light text color */
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#darkModeButton:hover {
+    background-color: #555; /* Darker background color on hover */
+}
+

@@ -1,0 +1,388 @@
+/* General styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #ffffff;
+    /* Set the background color for the entire page */
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100vh;
+    margin: 0;
+}
+
+.title-box {
+    background-color: #85b8cb;
+    /* Set the background color for the title box */
+    text-align: center;
+    padding: 10px 0;
+    /* Add padding for spacing */
+    box-shadow: 3px 0 5px rgba(0, 0, 0, 0.2);
+    /* Add a 3D box shadow to the left */
+
+}
+
+/* Style the "Tasks" title */
+.title {
+    color: #380568;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+
+/* Sidebar styles */
+.sidebar {
+    background-color: #85b8cb;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: 3px 0 5px rgba(0, 0, 0, 0.2);
+    /* Add a 3D box shadow to the left */
+
+}
+
+/* Content styles */
+.content {
+    width: 1000px;
+    padding: 20px;
+    /* Add some padding to separate content from the sidebar */
+}
+
+
+.sidebar h1 {
+    margin-top: 20px;
+    /* Adjust as needed */
+    margin-bottom: 10px;
+    /* Adjust as needed */
+}
+
+.sidebar form {
+    margin-bottom: 20px;
+    /* Adjust as needed */
+}
+
+/* Adjust the styles for the folder list items within the sidebar */
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Use flexbox to create space between folder name and the "Remove" button */
+.sidebar ul li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Style the "Remove" button */
+.sidebar ul li button {
+    background-color: #ff3333;
+    /* Red color code */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.sidebar ul li button:hover {
+    background-color: #d91c1c;
+    /* Darker red color code on hover */
+}
+
+
+.sidebar form {
+    margin-bottom: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* Style the "Add Folder" button */
+#addFolderButton {
+    margin-top: -35px;
+    /* Adjust the margin to align the button to the top of the sidebar */
+    margin-left: auto;
+    /* Push the button to the right by setting margin-left to auto */
+    display: block;
+    /* Make the button a block-level element */
+    background-color: #33adff;
+    /* Blue color code */
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px 20px;
+    transition: background-color 0.3s;
+}
+
+#folder_name {
+    width: 96.5%;
+}
+
+#addFolderButton:hover {
+    background-color: #1c87d9;
+    /* Darker blue color code on hover */
+}
+
+
+
+
+
+#addTaskButton {
+    position: absolute;
+    top: 10px;
+    right: 115px;
+    background-color: #33adff;
+    /* Add background color */
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px 20px;
+    transition: background-color 0.3s;
+}
+
+#addTaskButton:hover {
+    background-color: #1c87d9;
+    /* Darker blue color code on hover */
+}
+
+#darkModeButton {
+    position: absolute;
+    top: 10px;
+    right: 240px;
+    background-color: #333; /* Dark background color */
+    color: #fff; /* Light text color */
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#darkModeButton:hover {
+    background-color: #555; /* Darker background color on hover */
+}
+
+
+
+/* Logout button styles */
+.logout-form {
+    position: absolute;
+    top: 0px;
+    /* Adjust the top position as needed */
+    right: 10px;
+    /* Adjust the right position as needed */
+    display: block;
+    /* Make the button a block-level element */
+    margin-top: 10px;
+    /* Adjust the margin to separate it from the Logout button */
+    float: right;
+}
+
+.logout-form button {
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.logout-form button:hover {
+    background-color: #45a049;
+}
+
+
+
+
+
+/* User Folders list styles */
+#folder-list {
+    list-style: none;
+    padding: 0;
+}
+
+#folder-list li {
+    color: #333;
+    font-weight: bold;
+    margin: 10px 0;
+    cursor: pointer;
+}
+
+#footer {
+    background-color: #85b8cb;
+    /* Light background color */
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    color: #333;
+    /* Text color */
+    text-align: center;
+    padding: 20px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: center;
+}
+
+#footer a {
+    text-decoration: none;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+#footer a:hover {
+    color: #00f;
+}
+
+/* Style the task status columns */
+
+#status-column-pending {
+    width: 30%;
+    box-shadow: 3px 0 5px rgba(0, 0, 0, 0.2);
+    /* Add a 3D box shadow to the left */
+    display: inline-block;
+    vertical-align: top;
+    margin: 1%;
+    background-color: #ff4800;
+    text-align: center;
+    /* Align the column name to the center */
+}
+
+#status-column-pending ul {
+    text-align: left;
+    /* Align the text inside the list (tasks) to the left */
+}
+
+#status-column-in-progress {
+    box-shadow: 3px 0 5px rgba(0, 0, 0, 0.2);
+    /* Add a 3D box shadow to the left */
+    width: 30%;
+    display: inline-block;
+    vertical-align: top;
+    margin: 1%;
+    background-color: #19beff;
+    text-align: center;
+    /* Align the column name to the center */
+}
+
+#status-column-in-progress ul {
+    text-align: left;
+    /* Align the text inside the list (tasks) to the left */
+}
+
+#status-column-completed {
+    box-shadow: 3px 0 5px rgba(0, 0, 0, 0.2);
+    /* Add a 3D box shadow to the left */
+    width: 30%;
+    display: inline-block;
+    vertical-align: top;
+    margin: 1%;
+    background-color: #7cfc00;
+    text-align: center;
+    /* Align the column name to the center */
+}
+
+#status-column-completed ul {
+    text-align: left;
+    /* Align the text inside the list (tasks) to the left */
+}
+
+
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1;
+}
+
+.popup-content {
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.delete-button {
+    background-color: #ff3333;
+    /* Red color code */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.delete-button:hover {
+    background-color: #d91c1c;
+    /* Darker red color code on hover */
+}
+
+.edit-button {
+    background-color: #ffcc00;
+    /* Yellow color code */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.edit-button:hover {
+    background-color: #e5b800;
+    /* Darker yellow color code on hover */
+}
+
+/* Style the dark mode toggle button and its container */
+.button-container {
+    position: absolute;
+    top: 10px;
+    right: 240px;
+    /* Adjust the right position to position the button */
+    display: flex;
+    align-items: center;
+}
+
+

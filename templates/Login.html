@@ -2,14 +2,15 @@
 {% block title %}Login{% endblock %}
 {% block head %}
   {{ super() }}
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Create_Login.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Create_Login_Light.css') }}" id="light-mode-stylesheet">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Create_Login_Dark.css') }}" id="dark-mode-stylesheet" disabled> 
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 {% endblock %}
 {% block content %}
 <h1 class="title">Task Manager</h1>
 <div class="container">
     <form action="/login" method="POST">
         <h2>Login</h2>
-
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <ul>
@@ -19,7 +20,6 @@
             </ul>
         {% endif %}
         {% endwith %}
-
         <div class="input-container">
             <label for="email">Email</label>
             <input type="text" id="email" name="email" required>
@@ -31,8 +31,6 @@
         <button type="submit" class="btn">Log In</button>
     </form>
     <p>Don't have an account? <a href="/">Create Account</a></p>
+    <button onclick="toggleDarkMode()">Dark/Light</button>
 </div>
 {% endblock %}
-
-
-    
