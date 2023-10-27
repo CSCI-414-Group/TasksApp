@@ -79,6 +79,25 @@
   </div>
 </div>
 
+<div id="editTaskPopup" class="popup">
+  <div class="popup-content">
+      <span class="close" id="closeEditPopup">&times;</span>
+      <h3>Edit Task</h3>
+      <label for="editTaskName">New Task Name:</label>
+      <input type="text" id="editTaskName" required><br><br>
+      <label for="editTaskStatus">New Task Status:</label>
+      <select id="editTaskStatus" required>
+          <option value="Pending">Pending</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
+      </select><br><br>
+      <label for="editTaskImage">Task Image (optional):</label>
+      <input type="file" id="editTaskImage" name="editTaskImage"><br><br>
+      <input type="checkbox" id="editTaskRemoveImage" name="editTaskRemoveImage">
+      <label for="editTaskRemoveImage">Remove Image</label><br><br>
+      <button id="saveEditButton">Save</button>
+  </div>
+</div>
 
 </body>
 </html>
