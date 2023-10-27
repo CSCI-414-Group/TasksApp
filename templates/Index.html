@@ -8,15 +8,20 @@
 
 {% endblock %}
 {% block content %}
-<div class = "title-box"> 
-  <h1 class="title">Tasks</h1>
-  <button type="button" id="addTaskButton">Add Task</button>
-  <button id="darkModeButton" onclick="toggleDarkMode()">Dark/Light</button>
-  <form class = "logout-form" action="/logout" method="get">
-    <button type="submit">Logout</button>
-  </form>
-  
+
+
+<div id="title-box">
+  <div class="title-container">
+      <h1 class="title">Tasks</h1>
+      <button type="button" id="addTaskButton">Add Task</button>
+      <button id="darkModeButton" onclick="toggleDarkMode()">Dark/Light</button>
+      <form class = "logout-form" action="/logout" method="get">
+      <button type="submit">Logout</button>
+      </form>
+      <p id="greeting">Hello, {{ username }}</p>
+  </div>
 </div>
+
 
 <div class="sidebar">
   <h1>Add a Folder</h1>

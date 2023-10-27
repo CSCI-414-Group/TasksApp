@@ -12,22 +12,28 @@ body {
     margin: 0;
 }
 
-.title-box {
+
+#title-box {
     background-color: #85b8cb;
-    /* Set the background color for the title box */
+    /* Light background color */
+
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    color: #333;
+    /* Text color */
     text-align: center;
-    padding: 10px 0;
-    /* Add padding for spacing */
-    box-shadow: 3px 0 5px rgba(0, 0, 0, 0.2);
-    /* Add a 3D box shadow to the left */
+    padding: 20px;
+    position: fixed;
+    top: 0; /* Change "bottom: 0;" to "top: 0;" */
+    left: 250px;
+    right: 0;
+    z-index: 100; /* Add a z-index to control stacking order if needed */
 
 }
 
 /* Style the "Tasks" title */
-.title {
-    color: #380568;
-    font-size: 24px;
-    font-weight: bold;
+.title-container {
+    display: flex;
+    justify-content: center;
 }
 
 
@@ -50,9 +56,13 @@ body {
 
 /* Content styles */
 .content {
-    width: 1000px;
-    padding: 20px;
-    /* Add some padding to separate content from the sidebar */
+    flex: 1;
+    padding: 200px; /* Adjust the padding as needed */
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Center vertically */
+    margin-left: 250px; /* Match the sidebar width */
+    /* Add some margin to separate content from the sidebar */
 }
 
 
@@ -136,7 +146,20 @@ body {
 }
 
 
-
+#greeting {
+    position: absolute;
+    top: 10px;
+    right: 365px;
+    background-color: #7bb0d1;
+    /* Add background color */
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 35px;
+    padding: 10px 20px;
+    transition: background-color 0.3s;
+}
 
 
 #addTaskButton {
@@ -261,6 +284,7 @@ body {
 /* Style the task status columns */
 
 #status-column-pending {
+    border-radius: 50px;
     width: 30%;
     box-shadow: 3px 0 5px rgba(0, 0, 0, 0.2);
     /* Add a 3D box shadow to the left */
@@ -278,6 +302,7 @@ body {
 }
 
 #status-column-in-progress {
+    border-radius: 50px;
     box-shadow: 3px 0 5px rgba(0, 0, 0, 0.2);
     /* Add a 3D box shadow to the left */
     width: 30%;
@@ -295,6 +320,7 @@ body {
 }
 
 #status-column-completed {
+    border-radius: 50px;
     box-shadow: 3px 0 5px rgba(0, 0, 0, 0.2);
     /* Add a 3D box shadow to the left */
     width: 30%;

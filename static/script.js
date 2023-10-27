@@ -268,9 +268,7 @@ document.addEventListener("DOMContentLoaded", function () {
         taskItem.appendChild(editButton);
     }
 
-    function updateTaskOnServer(taskItem, oldTaskName, newTaskName, newTaskStatus, fileName, newImage, taskNameElement, taskStatusElement) {
-        console.log("image name:" + fileName);
-        console.log("image data:" + newImage);
+    function updateTaskOnServer(folderName, taskName, newTaskName, newTaskStatus, newTaskImageFile, imageName, removeImage){
         fetch('/update', {
             method: 'POST',
             headers: {
@@ -278,11 +276,12 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             body: JSON.stringify({
                 folderName: folderNameFromClick,
-                oldTaskName: oldTaskName,
+                oldTaskName: taskName,
                 newTaskName: newTaskName,
                 newTaskStatus: newTaskStatus,
-                newImage: newImage,
-                fileName: fileName
+                newImage: newTaskImageFile,
+                fileName: imageName,
+                removeImage: removeImage
             })
         })
             .then(response => response.json())
@@ -294,13 +293,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     const newTaskDocument = result.updated_data;
                     console.log('Task updated:', newTaskDocument);
                     const newTaskName = newTaskDocument.name;
-                    const newTaskStatus = selectedStatus;
-                    const newTaskStatusString = newTaskStatus;
-                    console.log('Task status:', newTaskStatus);
-                    console.log('Task status test:', result.updated_data.status);
-
+                    const newTaskStatus = newTaskDocument.status;
+                    /*
                     const newImage = newTaskDocument.imageFileData;
-                    const fileName = newTaskDocument.imageFileName;
+                    /const fileName = newTaskDocument.imageFileName;
                     taskItem.setAttribute('data-title', newTaskName);
                     taskItem.setAttribute('data-status', newTaskStatus);
                     taskItem.innerHTML = `
@@ -320,6 +316,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     createEditButton(taskItem);
                     createDeleteButton(newTaskName, taskItem);
                     alert('Task edited successfully!');
+                    */
                 }
             })
             .catch(error => {
@@ -498,7 +495,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const editTaskImageInput = document.getElementById('editTaskImage');
         const editTaskRemoveImageCheckbox = document.getElementById('editTaskRemoveImage');
         const saveEditButton = document.getElementById('saveEditButton');
-    
+
         // Populate the edit task popup with the current task details
         editTaskNameInput.value = taskName;
         editTaskStatusInput.value = taskStatus;
@@ -508,7 +505,7 @@ document.addEventListener("DOMContentLoaded", function () {
         editTaskPopup.style.display = 'block';
     
         // Handle the save button click
-        saveEditButton.onclick = function () {
+        saveEditButton.onclick = async function () {
             const newTaskName = editTaskNameInput.value;
             const newTaskStatus = editTaskStatusInput.value;
             const removeImage = editTaskRemoveImageCheckbox.checked;
@@ -516,10 +513,18 @@ document.addEventListener("DOMContentLoaded", function () {
             // Determine the file input and its selected file
             const newTaskImageInput = editTaskImageInput;
             const newTaskImageFile = newTaskImageInput.files[0];
+            let binaryData;
+            if(newTaskImageFile){
+                fileName = newTaskImageFile.name;
+                binaryData = newTaskImageFile ? await readFileAsBase64(newTaskImageFile) : null;
+            }
+            else{
+                fileName = null;
+            }
     
             // Call the function to update the task
-            updateTaskOnServer(folderName, taskName, newTaskName, newTaskStatus, newTaskImageFile, removeImage);
-    
+            updateTaskOnServer(folderNameFromClick, taskName, newTaskName, newTaskStatus, binaryData, fileName,removeImage);
+
             // Hide the edit task popup after saving
             editTaskPopup.style.display = 'none';
         };
