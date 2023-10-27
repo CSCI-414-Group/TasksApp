@@ -63,8 +63,6 @@ async function addTaskToServer(taskName, status, folderName, binaryData, imageFi
     const result = await response.json();
     if (result.success) {
         alert('Task added successfully!');
-        const taskStatus = result.updated_data.status;
-        addTaskToColumn(taskName, taskStatus);
     } else {
         alert('Failed to add the task. Please check your input and try again.');
     }
@@ -82,6 +80,7 @@ function addTaskToColumn(taskName, taskStatus) {
         document.getElementById('completed-tasks').appendChild(taskItem);
     }
 }
+
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -237,9 +236,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const oldTaskName = taskNameElement;
             const oldTaskStatus = taskStatusElement;
 
-            const newTaskName = prompt('Enter the new task name:', oldTaskName);
-            const newTaskStatus = prompt('Enter the new task status:', oldTaskStatus);
-
             const modal = document.getElementById('custom-modal');
             modal.style.display = 'block';
 
@@ -272,9 +268,7 @@ document.addEventListener("DOMContentLoaded", function () {
         taskItem.appendChild(editButton);
     }
 
-    function updateTaskOnServer(taskItem, oldTaskName, newTaskName, newTaskStatus, fileName, newImage, taskNameElement, taskStatusElement) {
-        console.log("image name:" + fileName);
-        console.log("image data:" + newImage);
+    function updateTaskOnServer(folderName, taskName, newTaskName, newTaskStatus, newTaskImageFile, imageName, removeImage){
         fetch('/update', {
             method: 'POST',
             headers: {
@@ -282,11 +276,12 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             body: JSON.stringify({
                 folderName: folderNameFromClick,
-                oldTaskName: oldTaskName,
+                oldTaskName: taskName,
                 newTaskName: newTaskName,
                 newTaskStatus: newTaskStatus,
-                newImage: newImage,
-                fileName: fileName
+                newImage: newTaskImageFile,
+                fileName: imageName,
+                removeImage: removeImage
             })
         })
             .then(response => response.json())
@@ -298,32 +293,30 @@ document.addEventListener("DOMContentLoaded", function () {
                     const newTaskDocument = result.updated_data;
                     console.log('Task updated:', newTaskDocument);
                     const newTaskName = newTaskDocument.name;
-                    const newTaskStatus = selectedStatus;
-                    const newTaskStatusString = newTaskStatus;
-                    console.log('Task status:', newTaskStatus);
-                    console.log('Task status test:', result.updated_data.status);
-
+                    const newTaskStatus = newTaskDocument.status;
+                    /*
                     const newImage = newTaskDocument.imageFileData;
-                    const fileName = newTaskDocument.imageFileName;
+                    /const fileName = newTaskDocument.imageFileName;
                     taskItem.setAttribute('data-title', newTaskName);
                     taskItem.setAttribute('data-status', newTaskStatus);
                     taskItem.innerHTML = `
                     <div>
                         Title: ${task.name}<br>Status: ${task.status}
                         ${task.imageFileName && task.imageFileData
-                        ? `
+                            ? `
                             <a href="${task.imageFileData}" download="${task.imageFileName}">
                                 ${task.imageFileName}
                             </a>
                         `
-                        : ''
-                    }
+                            : ''
+                        }
                     </div>
                 `;
                     taskList.appendChild(taskItem);
                     createEditButton(taskItem);
                     createDeleteButton(newTaskName, taskItem);
                     alert('Task edited successfully!');
+                    */
                 }
             })
             .catch(error => {
@@ -357,7 +350,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             const taskItem = document.createElement('div');
                             taskItem.setAttribute('data-title', task.name); // Add data-title attribute
                             taskItem.setAttribute('data-status', task.status);
-                        
+
                             // Create a function to determine the correct column based on the task status
                             function getColumn(status) {
                                 switch (status) {
@@ -371,19 +364,19 @@ document.addEventListener("DOMContentLoaded", function () {
                                         return null;
                                 }
                             }
-                        
+
                             // Get the appropriate column and append the task item
                             const column = getColumn(task.status);
                             if (column) {
                                 column.appendChild(taskItem);
                             }
-                        
+
                             // Create a container for the task details
                             const taskDetails = document.createElement('div');
-                        
+
                             // Create the task details HTML based on whether the file is defined
                             let taskDetailsHTML = `<p>Title: ${task.name}</p>`;
-                        
+
                             if (task.imageFileData) {
                                 // Include the image with a downloadable link
                                 taskDetailsHTML += `
@@ -391,17 +384,17 @@ document.addEventListener("DOMContentLoaded", function () {
                                         <img alt="${task.imageFileName}" />
                                     </a>`;
                             }
-                        
+
                             // Add task details to the container
                             taskDetails.innerHTML = taskDetailsHTML;
-                        
+
                             // Append the task details container to the task item
                             taskItem.appendChild(taskDetails);
 
 
                             // Append the task details container to the task item
                             taskItem.appendChild(taskDetails);
-                        
+
                             createEditButton(taskItem);
                             createDeleteButton(task.name, taskItem);
                         });
@@ -445,7 +438,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const newTaskStatus = taskStatus.options[taskStatus.selectedIndex].value;
         const folderName = folderNameFromClick;
         const taskImage = document.getElementById('taskImage').files[0];
-    
+
         if (taskName && newTaskStatus) {
             const binaryData = taskImage ? await readFileAsBase64(taskImage) : null;
             addTaskToServer(taskName, newTaskStatus, folderName, binaryData, taskImage);
@@ -453,7 +446,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             alert('Please fill in all required fields.');
         }
-        
+
     });
 
     async function readFileAsBase64(file) {
@@ -493,5 +486,70 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+
+    function openEditTaskPopup(folderName, taskName, taskStatus) {
+        // Select the popup elements
+        const editTaskPopup = document.getElementById('editTaskPopup');
+        const editTaskNameInput = document.getElementById('editTaskName');
+        const editTaskStatusInput = document.getElementById('editTaskStatus');
+        const editTaskImageInput = document.getElementById('editTaskImage');
+        const editTaskRemoveImageCheckbox = document.getElementById('editTaskRemoveImage');
+        const saveEditButton = document.getElementById('saveEditButton');
+
+        // Populate the edit task popup with the current task details
+        editTaskNameInput.value = taskName;
+        editTaskStatusInput.value = taskStatus;
+        editTaskImageInput.value = ''; // Clear the file input
+    
+        // Display the edit task popup
+        editTaskPopup.style.display = 'block';
+    
+        // Handle the save button click
+        saveEditButton.onclick = async function () {
+            const newTaskName = editTaskNameInput.value;
+            const newTaskStatus = editTaskStatusInput.value;
+            const removeImage = editTaskRemoveImageCheckbox.checked;
+    
+            // Determine the file input and its selected file
+            const newTaskImageInput = editTaskImageInput;
+            const newTaskImageFile = newTaskImageInput.files[0];
+            let binaryData;
+            if(newTaskImageFile){
+                fileName = newTaskImageFile.name;
+                binaryData = newTaskImageFile ? await readFileAsBase64(newTaskImageFile) : null;
+            }
+            else{
+                fileName = null;
+            }
+    
+            // Call the function to update the task
+            updateTaskOnServer(folderNameFromClick, taskName, newTaskName, newTaskStatus, binaryData, fileName,removeImage);
+
+            // Hide the edit task popup after saving
+            editTaskPopup.style.display = 'none';
+        };
+    }
+    
+    // Close the edit task popup
+    const closeEditPopup = document.getElementById('closeEditPopup');
+    closeEditPopup.addEventListener('click', function () {
+        const editTaskPopup = document.getElementById('editTaskPopup');
+        editTaskPopup.style.display = 'none';
+    });
+    
+    // Add an event listener to open the edit task popup when you click on a task
+    document.addEventListener('click', function (event) {
+        if (event.target && event.target.classList.contains('edit-button')) {
+            // Get task details from the task item
+            const taskItem = event.target.parentElement;
+            const folderName = folderNameFromClick;
+            const taskName = taskItem.getAttribute('data-title');
+            const taskStatus = taskItem.getAttribute('data-status');
+    
+            // Call the function to open the edit task popup
+            openEditTaskPopup(folderName, taskName, taskStatus);
+        }
+    });
+    
 
 });

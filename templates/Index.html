@@ -8,15 +8,20 @@
 
 {% endblock %}
 {% block content %}
-<div class = "title-box"> 
-  <h1 class="title">Tasks</h1>
-  <button type="button" id="addTaskButton">Add Task</button>
-  <button id="darkModeButton" onclick="toggleDarkMode()">Dark/Light</button>
-  <form class = "logout-form" action="/logout" method="get">
-    <button type="submit">Logout</button>
-  </form>
-  
+
+
+<div id="title-box">
+  <div class="title-container">
+      <h1 class="title">Tasks</h1>
+      <button type="button" id="addTaskButton">Add Task</button>
+      <button id="darkModeButton" onclick="toggleDarkMode()">Dark/Light</button>
+      <form class = "logout-form" action="/logout" method="get">
+      <button type="submit">Logout</button>
+      </form>
+      <p id="greeting">Hello, {{ username }}</p>
+  </div>
 </div>
+
 
 <div class="sidebar">
   <h1>Add a Folder</h1>
@@ -79,6 +84,25 @@
   </div>
 </div>
 
+<div id="editTaskPopup" class="popup">
+  <div class="popup-content">
+      <span class="close" id="closeEditPopup">&times;</span>
+      <h3>Edit Task</h3>
+      <label for="editTaskName">New Task Name:</label>
+      <input type="text" id="editTaskName" required><br><br>
+      <label for="editTaskStatus">New Task Status:</label>
+      <select id="editTaskStatus" required>
+          <option value="Pending">Pending</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
+      </select><br><br>
+      <label for="editTaskImage">Task Image (optional):</label>
+      <input type="file" id="editTaskImage" name="editTaskImage"><br><br>
+      <input type="checkbox" id="editTaskRemoveImage" name="editTaskRemoveImage">
+      <label for="editTaskRemoveImage">Remove Image</label><br><br>
+      <button id="saveEditButton">Save</button>
+  </div>
+</div>
 
 </body>
 </html>

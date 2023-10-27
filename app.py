@@ -21,9 +21,6 @@ app.secret_key = str(uuid.uuid4())  # Replace with a secure secret key
 app.config['TESTING'] = False
 
 #postgre sql setup
-
-#postgre sql setup
-
 db_config = {
     'dbname': 'Project1',
     'user': 'postgres',
@@ -78,15 +75,16 @@ def login_post():
     conn = psycopg2.connect(**db_config)
     cur = conn.cursor()
 
-    cur.execute("SELECT user_id, password FROM users WHERE username = %s", (email,))
+    cur.execute("SELECT user_id, username, password FROM users WHERE username = %s", (email,))
     result = cur.fetchone()
 
     if result is not None:
-        user_id, stored_password_hash = result
+        user_id, username, stored_password_hash = result
         conn.close()
 
         if stored_password_hash == hashPassword(password):
             session['userId'] = user_id
+            session['userName'] = username
             print(f"Username in session:{session.get('userId')}")
             return redirect("/tasks")
         else:
@@ -145,7 +143,7 @@ def check_email():
 @app.route('/tasks',  methods=['GET', 'POST'])
 @login_required
 def getTasks():
-    return render_template('index.html')
+    return render_template('index.html', username=session.get('userName'))
 
 @app.route('/addFolder', methods=['POST'])
 def add_folder():
@@ -330,6 +328,7 @@ def remove_folder():
 @app.route('/update', methods=['POST'])
 def update():
     try:
+
         data = request.get_json()
         folder_name = data.get('folderName')
         old_task_name = data.get('oldTaskName')
@@ -337,6 +336,7 @@ def update():
         new_task_status = data.get('newTaskStatus')
         new_image = data.get('newImage')
         filename = data.get('fileName')
+        isRemovFile = data.get('removeImage')
         user_id = session.get('userId')  # Get the user's ID
 
         newTaskDocument = {
@@ -349,33 +349,33 @@ def update():
         # Find the user's document by user_id
         user_document = tasks.find_one({'userId': user_id})
         if user_document:
-             for folder in user_document['folders']:
+            for folder in user_document['folders']:
                 if folder['name'] == folder_name:
                     for task in folder['tasks']:
                         if task['name'] == old_task_name:
                             # Update task details
                             task['name'] = new_task_name
                             task['status'] = new_task_status
-                            
-                            # testing this as well
-                            if new_image:
+
+                            # Check if an image update or removal is requested
+                            if filename and not isRemovFile:
                                 task['imageFileName'] = filename
                                 task['imageFileData'] = new_image
-                                newTaskDocument['name']=task['name']
-                                newTaskDocument['status']= task['status']
-                                newTaskDocument['imageFileName']=filename
-                                newTaskDocument['imageFileData']=new_image
-                            else:
-                                newTaskDocument['name']=task['name']
-                                newTaskDocument['status']= task['status']
-                                newTaskDocument['imageFileName']=task['imageFileName']
-                                newTaskDocument['imageFileData']=task['imageFileData']
+                                newTaskDocument['imageFileName'] = task.get('imageFileName')
+                                newTaskDocument['imageFileData'] = task.get('imageFileData')
+                            elif isRemovFile:
+                                # Remove image details if image removal is requested
+                                task.pop('imageFileName', None)
+                                task.pop('imageFileData', None)
+
+                            newTaskDocument['name'] = task['name']
+                            newTaskDocument['status'] = task['status']
+
                             # Update the user's document in the database
                             tasks.update_one({'userId': user_id}, {'$set': user_document})
                             return jsonify({"updated_data": newTaskDocument})
 
-        else:
-            return jsonify({"error": "User not found"}), 404
+        return jsonify({"error": "Task not found"}), 404
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
