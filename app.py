@@ -1,11 +1,13 @@
 from flask import Flask, request, render_template, redirect, url_for, jsonify, flash, session  
 import hashlib
+import psycopg2
 import uuid
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
 from functools import wraps
 from flask import jsonify
 from werkzeug.utils import secure_filename
+from bson.objectid import ObjectId
 
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'  # You can choose other options like 'redis' or 'sqlalchemy'
@@ -14,9 +16,9 @@ app.config['TESTING'] = False
 
 #postgre sql setup
 db_config = {
-    'dbname': 'Project1',
+    'dbname': 'TaskManagement',
     'user': 'postgres',
-    'password': 'TryMe@2020$',
+    'password': 'shaheen1',
     'host': 'localhost',
     'port': '5432'
 }
@@ -376,6 +378,91 @@ def remove_task():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/editFolder', methods=['POST'])
+def edit_folder():
+    try:
+        # Get data from the request
+        user_id = session.get('userId')  # Get the user's ID
+        old_folder_name = request.json.get('old_folder_name')
+        new_folder_name = request.json.get('new_folder_name')
+
+        user_document = tasks.find_one({'userId': user_id})
+        if not user_document:
+            return jsonify({"success": False, "error": "User not found"})
+        
+        result = tasks.update_one(
+            {
+                'userId': user_id,
+                "folders.name": old_folder_name
+            },
+            {
+                "$set": {
+                    "folders.$.name": new_folder_name
+                }
+            }
+        )
+
+        if result.matched_count == 1 and result.modified_count == 1:
+            return jsonify({"success": True, "message": "Folder name updated successfully"})
+        else:
+            return jsonify({"success": False, "message": "Failed to update folder name"})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/checkFolderExistence', methods=['POST'])
+def check_folder_existence():
+    try:
+        # Get request data
+        data = request.get_json()
+        folder_name = data.get('folderName')
+        user_id = session.get('userId')  # Get the user's ID
+
+        if not folder_name or not user_id:
+            return jsonify({"message": "Invalid input", "exists": False}), 400
+
+        user = tasks.find_one({"userId": user_id})  # assuming your collection name is 'users'
+
+        if not user:
+            return jsonify({"message": "User not found", "exists": False}), 404
+
+        # Check if folder exists
+        folder_exists = any(folder['name'] == folder_name for folder in user['folders'])
+    
+        return jsonify({"message": "Success", "exists": folder_exists}), 200
+
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {str(e)}", "exists": False}), 500
+
+@app.route('/checkTaskExistence', methods=['POST'])
+def check_task_existence():
+    try:
+        # Get request data
+        data = request.get_json()
+        task_name = data.get('taskName')
+        folder_name = data.get('folderName')
+        user_id = session.get('userId')  # Get the user's ID
+
+        if not task_name or not folder_name or not user_id:
+            return jsonify({"message": "Invalid input", "exists": False}), 400
+
+        user = tasks.find_one({"userId": user_id})  # assuming your collection name is 'users'
+
+        if not user:
+            return jsonify({"message": "User not found", "exists": False}), 404
+
+        folder = next((f for f in user['folders'] if f['name'] == folder_name), None)
+
+        if folder is None:
+            return jsonify({"message": "Folder not found", "exists": False}), 404
+
+        # Check if task exists in the folder
+        task_exists = any(task['name'] == task_name for task in folder['tasks'])
+
+        return jsonify({"message": "Success", "exists": task_exists}), 200
+
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {str(e)}", "exists": False}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
