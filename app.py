@@ -140,6 +140,7 @@ def getTasks():
     return render_template('index.html', username=session.get('userName'))
 
 @app.route('/addFolder', methods=['POST'])
+@login_required
 def add_folder():
     try:
         data = request.get_json() 
@@ -167,6 +168,7 @@ def add_folder():
         return jsonify({"error": str(e)}), 500
     
 @app.route('/addTaskToFolder', methods=['POST'])
+@login_required
 def addTaskToFolder():
     try:
         data = request.get_json()
@@ -209,6 +211,7 @@ def addTaskToFolder():
 
 
 @app.route('/getFolderTask', methods=['GET'])
+@login_required
 def getAllTasks():
     try:
         folder_name = request.args.get('folder_name')
@@ -248,6 +251,7 @@ def getAllTasks():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/getFolders', methods=['GET'])
+@login_required
 def list_folders():
     try:
         user_id = session.get('userId')
@@ -269,6 +273,7 @@ def list_folders():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/removeFolder', methods=['POST'])
+@login_required
 def remove_folder():
     try:
         folder_name = request.json.get('folderName')
@@ -290,6 +295,7 @@ def remove_folder():
         return jsonify({"error": str(e)}), 500
     
 @app.route('/update', methods=['POST'])
+@login_required
 def update():
     try:
 
@@ -346,6 +352,7 @@ def update():
 
 # removing/deleting tasks function from folder
 @app.route('/removeTask', methods=['POST'])
+@login_required
 def remove_task():
     try:
         data = request.get_json()
@@ -379,6 +386,7 @@ def remove_task():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/editFolder', methods=['POST'])
+@login_required
 def edit_folder():
     try:
         # Get data from the request
@@ -411,6 +419,7 @@ def edit_folder():
         return jsonify({"success": False, "error": str(e)})
 
 @app.route('/checkFolderExistence', methods=['POST'])
+@login_required
 def check_folder_existence():
     try:
         # Get request data
@@ -435,6 +444,7 @@ def check_folder_existence():
         return jsonify({"message": f"An error occurred: {str(e)}", "exists": False}), 500
 
 @app.route('/checkTaskExistence', methods=['POST'])
+@login_required
 def check_task_existence():
     try:
         # Get request data
