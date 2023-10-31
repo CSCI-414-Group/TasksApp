@@ -1,19 +1,13 @@
 from flask import Flask, request, render_template, redirect, url_for, jsonify, flash, session  
-import psycopg2
 import hashlib
-import os
+import psycopg2
 import uuid
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
-from flask import Flask, render_template
 from functools import wraps
-from bson import ObjectId
-from bson import Binary
 from flask import jsonify
-import base64
-from PIL import Image
-import io
 from werkzeug.utils import secure_filename
+from bson.objectid import ObjectId
 
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'  # You can choose other options like 'redis' or 'sqlalchemy'
@@ -22,9 +16,9 @@ app.config['TESTING'] = False
 
 #postgre sql setup
 db_config = {
-    'dbname': 'Project1',
+    'dbname': 'TaskManagement',
     'user': 'postgres',
-    'password': 'TryMe@2020$',
+    'password': 'shaheen1',
     'host': 'localhost',
     'port': '5432'
 }
@@ -146,6 +140,7 @@ def getTasks():
     return render_template('index.html', username=session.get('userName'))
 
 @app.route('/addFolder', methods=['POST'])
+@login_required
 def add_folder():
     try:
         data = request.get_json() 
@@ -172,37 +167,8 @@ def add_folder():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-# @app.route('/addTaskToFolder', methods=['POST'])
-# def addTaskToFolder():
-#     if request.method == 'POST':
-#         data = request.get_json()
-#         folder_name = data.get('folderName')
-#         task_name = data.get('taskName')
-#         task_status = data.get('status')
-#         image_data = data.get('imageData')
-#         filename = data.get('fileName')
-       
-#         userId = session.get('userId')
-#         user_document = tasks.find_one({'userId': userId})
-#         folder_to_update = None
-#         for folder in user_document['folders']:
-#             if folder['name'] == folder_name:
-#                 folder_to_update = folder
-#                 break
-    
-#         task_data = {
-#             'name': task_name,
-#             'status': task_status,
-#         }
-#         if image_data:
-#             task_data['imageFileName'] = filename
-#             task_data['imageFileData'] = image_data
-             
-#         folder_to_update['tasks'].append(task_data)
-#         tasks.update_one({'userId': userId}, {'$set': {'folders': user_document['folders']}})  
-#     return redirect(url_for('getTasks'))
-
 @app.route('/addTaskToFolder', methods=['POST'])
+@login_required
 def addTaskToFolder():
     try:
         data = request.get_json()
@@ -245,6 +211,7 @@ def addTaskToFolder():
 
 
 @app.route('/getFolderTask', methods=['GET'])
+@login_required
 def getAllTasks():
     try:
         folder_name = request.args.get('folder_name')
@@ -284,6 +251,7 @@ def getAllTasks():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/getFolders', methods=['GET'])
+@login_required
 def list_folders():
     try:
         user_id = session.get('userId')
@@ -305,6 +273,7 @@ def list_folders():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/removeFolder', methods=['POST'])
+@login_required
 def remove_folder():
     try:
         folder_name = request.json.get('folderName')
@@ -326,6 +295,7 @@ def remove_folder():
         return jsonify({"error": str(e)}), 500
     
 @app.route('/update', methods=['POST'])
+@login_required
 def update():
     try:
 
@@ -382,6 +352,7 @@ def update():
 
 # removing/deleting tasks function from folder
 @app.route('/removeTask', methods=['POST'])
+@login_required
 def remove_task():
     try:
         data = request.get_json()
@@ -414,6 +385,94 @@ def remove_task():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/editFolder', methods=['POST'])
+@login_required
+def edit_folder():
+    try:
+        # Get data from the request
+        user_id = session.get('userId')  # Get the user's ID
+        old_folder_name = request.json.get('old_folder_name')
+        new_folder_name = request.json.get('new_folder_name')
+
+        user_document = tasks.find_one({'userId': user_id})
+        if not user_document:
+            return jsonify({"success": False, "error": "User not found"})
+        
+        result = tasks.update_one(
+            {
+                'userId': user_id,
+                "folders.name": old_folder_name
+            },
+            {
+                "$set": {
+                    "folders.$.name": new_folder_name
+                }
+            }
+        )
+
+        if result.matched_count == 1 and result.modified_count == 1:
+            return jsonify({"success": True, "message": "Folder name updated successfully"})
+        else:
+            return jsonify({"success": False, "message": "Failed to update folder name"})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/checkFolderExistence', methods=['POST'])
+@login_required
+def check_folder_existence():
+    try:
+        # Get request data
+        data = request.get_json()
+        folder_name = data.get('folderName')
+        user_id = session.get('userId')  # Get the user's ID
+
+        if not folder_name or not user_id:
+            return jsonify({"message": "Invalid input", "exists": False}), 400
+
+        user = tasks.find_one({"userId": user_id})  # assuming your collection name is 'users'
+
+        if not user:
+            return jsonify({"message": "User not found", "exists": False}), 404
+
+        # Check if folder exists
+        folder_exists = any(folder['name'] == folder_name for folder in user['folders'])
+    
+        return jsonify({"message": "Success", "exists": folder_exists}), 200
+
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {str(e)}", "exists": False}), 500
+
+@app.route('/checkTaskExistence', methods=['POST'])
+@login_required
+def check_task_existence():
+    try:
+        # Get request data
+        data = request.get_json()
+        task_name = data.get('taskName')
+        folder_name = data.get('folderName')
+        user_id = session.get('userId')  # Get the user's ID
+
+        if not task_name or not folder_name or not user_id:
+            return jsonify({"message": "Invalid input", "exists": False}), 400
+
+        user = tasks.find_one({"userId": user_id})  # assuming your collection name is 'users'
+
+        if not user:
+            return jsonify({"message": "User not found", "exists": False}), 404
+
+        folder = next((f for f in user['folders'] if f['name'] == folder_name), None)
+
+        if folder is None:
+            return jsonify({"message": "Folder not found", "exists": False}), 404
+
+        # Check if task exists in the folder
+        task_exists = any(task['name'] == task_name for task in folder['tasks'])
+
+        return jsonify({"message": "Success", "exists": task_exists}), 200
+
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {str(e)}", "exists": False}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

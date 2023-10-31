@@ -104,6 +104,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     data.folder_names.forEach(folderName => {
                         const listItem = document.createElement('li');
                         listItem.textContent = folderName;
+                        const editButton = createEditButton(folderName);
+                        listItem.appendChild(editButton);
                         const removeButton = createRemoveButton(folderName); // Call createRemoveButton
                         listItem.appendChild(removeButton); // Add the remove button to the list item              
                         folderList.appendChild(listItem);
@@ -120,23 +122,98 @@ document.addEventListener('DOMContentLoaded', function () {
     // Add Folder button click event
     addFolderButton.addEventListener('click', function () {
         const folder_name = document.getElementById('folder_name').value;
-        console.log(folder_name);
-        fetch('/addFolder', {
+    
+        if (folder_name.trim() === "") {
+            alert("Folder name cannot be empty");
+            return; // Do not proceed with the fetch request
+        }
+    
+        // Check folder existence on the server
+        fetch('/checkFolderExistence', {
             method: 'POST',
             body: JSON.stringify({ folderName: folder_name }),
             headers: {
                 'Content-Type': 'application/json'
             }
         })
-            .then(response => response.json())
-            .then(data => {
-                messageDiv.innerHTML = data.message;
-                refreshFolderList(); // Call the refreshFolderList function
-            })
-            .catch(error => {
-                messageDiv.innerHTML = `Error: ${error}`;
-            });
+        .then(response => response.json())
+        .then(data => {
+            if (data.exists) {
+                alert("Folder name already exists");
+            } else {
+                // If folder does not exist, proceed to add the folder
+                fetch('/addFolder', {
+                    method: 'POST',
+                    body: JSON.stringify({ folderName: folder_name }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }) // The misplaced closing parenthesis was here.
+                .then(response => response.json())
+                .then(data => {
+                    messageDiv.innerHTML = data.message;
+                    refreshFolderList();
+                })
+                .catch(error => {
+                    messageDiv.innerHTML = `Error: ${error}`;
+                });
+            }
+        }) // There was a misplaced curly brace and parenthesis here.
+        .catch(error => {
+            messageDiv.innerHTML = `Error: ${error}`;
+        });
     });
+    
+    
+
+    function createEditButton(folderName) {
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.addEventListener('click', function () {
+            // Show the modal
+            const modal = document.getElementById('myModal');
+            modal.style.display = "block";
+    
+            // Get the <span> element that closes the modal
+            const span = document.getElementsByClassName("close")[0];
+            span.onclick = function() {
+                modal.style.display = "none";
+            }
+    
+            // Handle the submission of the new folder name
+            document.getElementById('submitNewFolderName').onclick = function() {
+                const newFolderName = document.getElementById('newFolderNameInput').value;
+                if (newFolderName) {
+                    fetch('/editFolder', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            user_id: 'user_id', // Replace with the user's ID
+                            old_folder_name: folderName,
+                            new_folder_name: newFolderName
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            refreshFolderList();
+                        } else {
+                            console.error('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error: ' + error);
+                    });
+                    modal.style.display = "none"; // Close the modal after submission
+                }
+            };
+        });
+        return editButton;
+    }
+    
+
 
     // Remove Folder button click event
     function createRemoveButton(folderName) {
@@ -331,7 +408,8 @@ document.addEventListener("DOMContentLoaded", function () {
     folderList.addEventListener("click", function (event) {
         const target = event.target;
         if (target.tagName === 'LI') {
-            const folderName = target.textContent.replace('Remove', '');
+            var folderName = target.textContent.replace('Remove', '');
+            folderName = folderName.replace('Edit', '');
             folderNameFromClick = folderName
             console.log(folderName);
             // Make an AJAX request to your Python route
@@ -438,16 +516,40 @@ document.addEventListener("DOMContentLoaded", function () {
         const newTaskStatus = taskStatus.options[taskStatus.selectedIndex].value;
         const folderName = folderNameFromClick;
         const taskImage = document.getElementById('taskImage').files[0];
-
+    
         if (taskName && newTaskStatus) {
+            // First, check if task already exists
+            const doesTaskExist = await checkIfTaskExists(taskName, folderName);
+            if (doesTaskExist) {
+                alert("Task already exists in the folder");
+                return;
+            }
+    
             const binaryData = taskImage ? await readFileAsBase64(taskImage) : null;
             addTaskToServer(taskName, newTaskStatus, folderName, binaryData, taskImage);
             taskPopup.style.display = 'none';
         } else {
             alert('Please fill in all required fields.');
         }
-
     });
+
+    async function checkIfTaskExists(taskName, folderName) {
+        try {
+            const response = await fetch('/checkTaskExistence', {
+                method: 'POST',
+                body: JSON.stringify({ taskName: taskName, folderName: folderName }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            return data.exists;  // Assuming the server responds with a JSON object containing an "exists" boolean property
+        } catch (error) {
+            console.error(`Error checking task existence: ${error}`);
+            return false;
+        }
+    }
+    
 
     async function readFileAsBase64(file) {
         return new Promise((resolve, reject) => {
