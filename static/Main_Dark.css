@@ -1,4 +1,17 @@
 /* General styles */
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around; /* Or use other justify-content values as per your design */
+}
+
+/* Apply styles for specific screen sizes if needed */
+@media screen and (max-width: 768px) {
+    .container {
+        flex-direction: column; /* Stack items vertically on smaller screens */
+    }
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #333; /* Dark background color */
@@ -18,12 +31,14 @@ body {
     box-shadow: 3px 0 5px rgba(255, 255, 255, 0.2); /* White box shadow */
 }
 
+
 /* Style the "Tasks" title */
 .title {
     color: #666666; /* Orange text color */
     font-size: 24px;
     font-weight: bold;
 }
+
 
 /* Sidebar styles */
 .sidebar {

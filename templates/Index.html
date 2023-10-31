@@ -9,104 +9,102 @@
 {% endblock %}
 {% block content %}
 
-
-<div id="title-box">
-  <div class="title-container">
-      <h1 class="title">Tasks</h1>
-      <button type="button" id="addTaskButton">Add Task</button>
-      <button id="darkModeButton" onclick="toggleDarkMode()">Dark/Light</button>
-      <form class = "logout-form" action="/logout" method="get">
-      <button type="submit">Logout</button>
-      </form>
-      <p id="greeting">Hello, {{ username }}</p>
-  </div>
-</div>
-
-
-<div class="sidebar">
-  <h1>Add a Folder</h1>
-  <form id="addFolderForm">
-    <label for="folder_name">Folder Name:</label>
-    <input type="text" id="folder_name" name="folder_name" required><br><br>
-    <button type="button" id="addFolderButton">Add</button>
-  </form>
-  <div id="message"></div>
-
-  <h1>User Folders</h1>
-  <ul id="folder-list"></ul>
-  <div id="task-list"></div>
-</div>
-
-
-
-
-<div class="content">
-
-  <div class="status-column" id="status-column-pending">
-    <div class="column-box">
-      <h2>Pending Tasks</h2>
-      <ul id="pending-tasks"></ul>
+<div class="container">
+  <div id="title-box">
+    <div class="title-container">
+        <h1 class="title">Tasks</h1>
+        <button type="button" id="addTaskButton">Add Task</button>
+        <button id="darkModeButton" onclick="toggleDarkMode()">Dark/Light</button>
+        <form class = "logout-form" action="/logout" method="get">
+        <button type="submit">Logout</button>
+        </form>
+        <p id="greeting">Hello, {{ username }}</p>
+      </div>
     </div>
   </div>
-  
-  <div class="status-column" id="status-column-in-progress">
-    <div class="column-box">
-      <h2>In Progress Tasks</h2>
-      <ul id="in-progress-tasks"></ul>
+
+
+  <div class="sidebar">
+    <h1>Add a Folder</h1>
+    <form id="addFolderForm">
+      <label for="folder_name">Folder Name:</label>
+      <input type="text" id="folder_name" name="folder_name" required><br><br>
+      <button type="button" id="addFolderButton">Add</button>
+    </form>
+    <div id="message"></div>
+
+    <h1>User Folders</h1>
+    <ul id="folder-list"></ul>
+    <div id="task-list"></div>
+  </div>
+
+
+
+
+  <div class="content">
+
+    <div class="status-column" id="status-column-pending">
+      <div class="column-box">
+        <h2>Pending Tasks</h2>
+        <ul id="pending-tasks"></ul>
+      </div>
+    </div>
+    
+    <div class="status-column" id="status-column-in-progress">
+      <div class="column-box">
+        <h2>In Progress Tasks</h2>
+        <ul id="in-progress-tasks"></ul>
+      </div>
+    </div>
+    
+    <div class="status-column" id="status-column-completed">
+      <div class="column-box">
+        <h2>Completed Tasks</h2>
+        <ul id="completed-tasks"></ul>
+      </div>
     </div>
   </div>
-  
-  <div class="status-column" id="status-column-completed">
-    <div class="column-box">
-      <h2>Completed Tasks</h2>
-      <ul id="completed-tasks"></ul>
-    </div>
-  </div>
-</div>
 
-<div id="taskPopup" class="popup">
-  <div class="popup-content">
-    <span class="close" id="closePopup">&times;</span>
-    <h3>Add a Task</h3>
-    <label for="selectedFolder"></label>
-    <p id="selectedFolderName"></p> 
-    <label for="taskName">Task Name:</label>
-    <input type="text" id="taskName" required><br><br>
-    <label for="taskStatus">Task Status:</label>
-    <select id="taskStatus" required>
-      <option value="Pending">Pending</option>
-      <option value="In Progress">In Progress</option>
-      <option value="Completed">Completed</option>
-    </select><br><br>
-    <label for="taskImage">Image (optional):</label>
-    <input type="file" id="taskImage"><br><br>
-    <button id="addTaskToFolder">Add Task</button>
-  </div>
-</div>
-
-<div id="editTaskPopup" class="popup">
-  <div class="popup-content">
-      <span class="close" id="closeEditPopup">&times;</span>
-      <h3>Edit Task</h3>
-      <label for="editTaskName">New Task Name:</label>
-      <input type="text" id="editTaskName" required><br><br>
-      <label for="editTaskStatus">New Task Status:</label>
-      <select id="editTaskStatus" required>
-          <option value="Pending">Pending</option>
-          <option value="In Progress">In Progress</option>
-          <option value="Completed">Completed</option>
+  <div id="taskPopup" class="popup">
+    <div class="popup-content">
+      <span class="close" id="closePopup">&times;</span>
+      <h3>Add a Task</h3>
+      <label for="selectedFolder"></label>
+      <p id="selectedFolderName"></p> 
+      <label for="taskName">Task Name:</label>
+      <input type="text" id="taskName" required><br><br>
+      <label for="taskStatus">Task Status:</label>
+      <select id="taskStatus" required>
+        <option value="Pending">Pending</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Completed">Completed</option>
       </select><br><br>
-      <label for="editTaskImage">Task Image (optional):</label>
-      <input type="file" id="editTaskImage" name="editTaskImage"><br><br>
-      <input type="checkbox" id="editTaskRemoveImage" name="editTaskRemoveImage">
-      <label for="editTaskRemoveImage">Remove Image</label><br><br>
-      <button id="saveEditButton">Save</button>
+      <label for="taskImage">Image (optional):</label>
+      <input type="file" id="taskImage"><br><br>
+      <button id="addTaskToFolder">Add Task</button>
+    </div>
+  </div>
+
+  <div id="editTaskPopup" class="popup">
+    <div class="popup-content">
+        <span class="close" id="closeEditPopup">&times;</span>
+        <h3>Edit Task</h3>
+        <label for="editTaskName">New Task Name:</label>
+        <input type="text" id="editTaskName" required><br><br>
+        <label for="editTaskStatus">New Task Status:</label>
+        <select id="editTaskStatus" required>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+        </select><br><br>
+        <label for="editTaskImage">Task Image (optional):</label>
+        <input type="file" id="editTaskImage" name="editTaskImage"><br><br>
+        <input type="checkbox" id="editTaskRemoveImage" name="editTaskRemoveImage">
+        <label for="editTaskRemoveImage">Remove Image</label><br><br>
+        <button id="saveEditButton">Save</button>
+    </div>
   </div>
 </div>
-
 </body>
 </html>
 {% endblock %}
-
-
-    
