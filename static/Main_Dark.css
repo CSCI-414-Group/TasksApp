@@ -1,21 +1,11 @@
 /* General styles */
-.container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around; /* Or use other justify-content values as per your design */
-}
-
-/* Apply styles for specific screen sizes if needed */
-@media screen and (max-width: 768px) {
-    .container {
-        flex-direction: column; /* Stack items vertically on smaller screens */
-    }
-}
-
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #333; /* Dark background color */
-    color: #eee; /* Light text color */
+    background-color: #8a8a8a;
+    background: linear-gradient(270deg, #8a8a8a, #000000);
+
+    /* Set the background color for the entire page */
+    color: #333;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -24,25 +14,33 @@ body {
     margin: 0;
 }
 
-.title-box {
-    background-color: #000000; 
+
+#title-box {
+    background-color: #000000;
+    /* Light background color */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    color: #8a8a8a;
+    /* Text color */
     text-align: center;
-    padding: 10px 0;
-    box-shadow: 3px 0 5px rgba(255, 255, 255, 0.2); /* White box shadow */
+    padding: 20px;
+    position: fixed;
+    top: 0; /* Change "bottom: 0;" to "top: 0;" */
+    left: 250px;
+    right: 0;
+    z-index: 100; /* Add a z-index to control stacking order if needed */
+
 }
 
-
 /* Style the "Tasks" title */
-.title {
-    color: #666666; /* Orange text color */
-    font-size: 24px;
-    font-weight: bold;
+.title-container {
+    display: flex;
+    justify-content: center;
 }
 
 
 /* Sidebar styles */
 .sidebar {
-    background-color: #000000; 
+    background-color: #000000;
     width: 250px;
     position: fixed;
     top: 0;
@@ -52,24 +50,36 @@ body {
     flex-direction: column;
     overflow-y: auto;
     overflow-x: hidden;
-    box-shadow: 3px 0 5px rgba(255, 255, 255, 0.2); /* White box shadow */
+    box-shadow: 3px 0 5px rgba(0, 0, 0, 0.2);
+    /* Add a 3D box shadow to the left */
+
 }
 
 /* Content styles */
 .content {
-    width: 1000px;
-    padding: 20px;
+    flex: 1;
+    padding: 200px; /* Adjust the padding as needed */
+    display: none;
+    flex-direction: row;
+    justify-content: space-between; /* This ensures equal spacing between columns */
+    justify-content: center;
+    margin-left: 250px; /* Match the sidebar width */
+    /* Add some margin to separate content from the sidebar */
 }
+
 
 .sidebar h1 {
     margin-top: 20px;
+    /* Adjust as needed */
     margin-bottom: 10px;
+    /* Adjust as needed */
     color: #8a8a8a;
 }
 
 .sidebar form {
     margin-bottom: 20px;
-
+    color: #8a8a8a;
+    /* Adjust as needed */
 }
 
 /* Adjust the styles for the folder list items within the sidebar */
@@ -77,7 +87,6 @@ body {
     list-style: none;
     padding: 0;
     margin: 0;
-
 }
 
 /* Use flexbox to create space between folder name and the "Remove" button */
@@ -85,41 +94,55 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-
 }
 
 /* Style the "Remove" button */
 .sidebar ul li button {
-    background-color: #ff3333;
-    color: #fff;
+    background-color: #ff3333; /* Red color code */
+    color: #000000;
     border: none;
     border-radius: 4px;
     padding: 5px 10px;
     cursor: pointer;
+    margin: 0 1px;  /* Adds a 5px space between the buttons */
     transition: background-color 0.3s;
 }
 
 .sidebar ul li button:hover {
-    background-color: #d91c1c;
+    background-color: #d91c1c; /* Darker red color code on hover */
 }
+
+/* Style the "Edit" button */
+.sidebar ul li button:nth-child(1) {
+    background-color: #ffcc00; /* The desired color for "Edit" */
+    margin-left: auto;
+}
+
+.sidebar ul li button:nth-child(1):hover {
+    background-color: #e6b800; /* A slightly darker yellow for hover */
+}
+
 
 .sidebar form {
     margin-bottom: 5px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-
 }
 
 /* Style the "Add Folder" button */
 #addFolderButton {
     margin-top: -35px;
+    /* Adjust the margin to align the button to the top of the sidebar */
     margin-left: auto;
+    /* Push the button to the right by setting margin-left to auto */
     display: block;
+    /* Make the button a block-level element */
     background-color: #33adff;
+    /* Blue color code */
     border: none;
     border-radius: 4px;
-    color: #fff;
+    color: #000000;
     cursor: pointer;
     font-size: 16px;
     padding: 10px 20px;
@@ -127,22 +150,42 @@ body {
 }
 
 #folder_name {
+    background-color: #8a8a8a;
     width: 96.5%;
-    background-color: #b8b8b8;
+    
 }
 
 #addFolderButton:hover {
     background-color: #1c87d9;
+    /* Darker blue color code on hover */
 }
+
+
+#greeting {
+    position: absolute;
+    top: -10px;
+    left: 100px;
+    width: fit-content;
+    background-color: #006aac;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 10px 20px;
+    transition: background-color 0.3s;
+}
+
 
 #addTaskButton {
     position: absolute;
     top: 10px;
     right: 115px;
     background-color: #33adff;
+    /* Add background color */
     border: none;
     border-radius: 4px;
-    color: #fff;
+    color: #000000;
     cursor: pointer;
     font-size: 16px;
     padding: 10px 20px;
@@ -151,15 +194,40 @@ body {
 
 #addTaskButton:hover {
     background-color: #1c87d9;
+    /* Darker blue color code on hover */
 }
+
+#darkModeButton {
+    position: absolute;
+    top: 10px;
+    right: 240px;
+    background-color: #333; /* Dark background color */
+    color: #000000;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#darkModeButton:hover {
+    background-color: #555; /* Darker background color on hover */
+}
+
+
 
 /* Logout button styles */
 .logout-form {
     position: absolute;
     top: 0px;
+    /* Adjust the top position as needed */
     right: 10px;
+    /* Adjust the right position as needed */
     display: block;
+    /* Make the button a block-level element */
     margin-top: 10px;
+    /* Adjust the margin to separate it from the Logout button */
     float: right;
 }
 
@@ -167,7 +235,7 @@ body {
     background-color: #4CAF50;
     border: none;
     border-radius: 4px;
-    color: white;
+    color: #000000;
     border: none;
     padding: 10px 20px;
     text-align: center;
@@ -181,24 +249,29 @@ body {
     background-color: #45a049;
 }
 
+
 /* User Folders list styles */
 #folder-list {
     list-style: none;
     padding: 0;
+    color: #8a8a8a;
 }
 
 #folder-list li {
-    color: #eee; /* Light text color */
+    color: #8a8a8a;
     font-weight: bold;
     margin: 10px 0;
     cursor: pointer;
+    margin-left: 5px;
 }
 
 #footer {
-    background-color: #000000; /* Dark blue background color */
+    background-color: #000000;
+    /* Light background color */
     border-radius: 8px;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1); /* White box shadow */
-    color: #eee;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    color: #8a8a8a;
+    /* Text color */
     text-align: center;
     padding: 20px;
     position: fixed;
@@ -223,53 +296,58 @@ body {
 }
 
 /* Style the task status columns */
-#status-column-pending {
-    width: 30%;
-    box-shadow: 3px 0 5px rgba(255, 255, 255, 0.2); /* White box shadow */
-    display: inline-block;
-    vertical-align: top;
-    margin: 1%;
-    background-color: #ff4800;
-    text-align: center;
+.status-column {
+    flex: 1; /* Columns take equal width */
+    margin: 0 15px; /* Spacing between columns */
+    min-width: 0; /* This ensures that the column can shrink without wrapping content */
+    position: relative; /* Allows positioning of inner elements */
+    box-shadow: 0px 4px 6px rgba(0,0,0,0.1); /* Slight shadow for depth */
+    border-radius: 5px;
+    display: flex; /* Convert this container to flex */
+    flex-direction: column; /* Set direction to column for items to stack vertically */
+    align-items: center; /* Align items to center */
+    height: auto;
     color: #000000;
 }
 
-#status-column-pending ul {
-    text-align: left;
+.status-column h2 {
+    margin-top: 15px; /* Spacing at the top of headers */
+    text-align: center; /* Center the title text */
+    white-space: nowrap; /* This prevents the title from breaking into multiple lines */
+    border-radius: 5px; /* Rounded corners */
+    width: 200px;
+    flex-shrink: 0; /* Make sure the title doesn't shrink */
+}
+
+/* Apply individual colors for each column */
+#status-column-pending {
+    background-color: #ff4800;
+    height: fit-content;
 }
 
 #status-column-in-progress {
-    box-shadow: 3px 0 5px rgba(255, 255, 255, 0.2); /* White box shadow */
-    width: 30%;
-    display: inline-block;
-    vertical-align: top;
-    margin: 1%;
     background-color: #19beff;
-    text-align: center;
-    color: #000000;
-}
+    height: fit-content;
 
-#status-column-in-progress ul {
-    text-align: left;
 }
 
 #status-column-completed {
-    box-shadow: 3px 0 5px rgba(255, 255, 255, 0.2); /* White box shadow */
-    width: 30%;
-    display: inline-block;
-    vertical-align: top;
-    margin: 1%;
     background-color: #7cfc00;
-    text-align: center;
-    color: #000000;
+    height: fit-content;
+
 }
 
-#status-column-completed ul {
-    text-align: left;
+.column-with-tasks {
+    height: auto; /* override the fixed height */
+    max-height: 500px; /* or any maximum height you prefer, after which it will start scrolling */
+    overflow-y: auto; /* allow scrolling if the tasks exceed the max height */
 }
+
+
+
+
 
 .popup {
-    color: #8a8a8a;
     display: none;
     position: fixed;
     top: 0;
@@ -281,7 +359,7 @@ body {
 }
 
 .popup-content {
-    background-color: #000000;
+    background-color: #fff;
     border-radius: 5px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     position: absolute;
@@ -301,7 +379,8 @@ body {
 
 .delete-button {
     background-color: #ff3333;
-    color: #fff;
+    /* Red color code */
+    color: #000000;
     border: none;
     border-radius: 4px;
     padding: 5px 10px;
@@ -311,11 +390,13 @@ body {
 
 .delete-button:hover {
     background-color: #d91c1c;
+    /* Darker red color code on hover */
 }
 
 .edit-button {
     background-color: #ffcc00;
-    color: #fff;
+    /* Yellow color code */
+    color: #000000;
     border: none;
     border-radius: 4px;
     padding: 5px 10px;
@@ -325,6 +406,7 @@ body {
 
 .edit-button:hover {
     background-color: #e5b800;
+    /* Darker yellow color code on hover */
 }
 
 /* Style the dark mode toggle button and its container */
@@ -332,25 +414,65 @@ body {
     position: absolute;
     top: 10px;
     right: 240px;
+    /* Adjust the right position to position the button */
     display: flex;
     align-items: center;
 }
 
-#darkModeButton {
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+    z-index: 1;
+
+}
+/* Modal Content */
+.modal-content {
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     position: absolute;
-    top: 10px;
-    right: 240px;
-    background-color: #000000; /* Dark background color */
-    color: #fff; /* Light text color */
-    border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+}
+
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
     cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
 }
 
-#darkModeButton:hover {
-    background-color: #555; /* Darker background color on hover */
+.task-border {
+    border: 1px solid black;
+    margin: 10px 0;
+    padding: 5px;
+    border-radius: 5px; /* If you want rounded corners */
+    max-width: 90%; /* Adjust this value as needed */
+    width: 100%;
+
 }
 
+.task-image {
+    width: 100px; /* or any desired width */
+    height: auto; /* maintain the aspect ratio */
+    display: block;
+    margin: 10px auto; /* centering if the parent container is a block element */
+}

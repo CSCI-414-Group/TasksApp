@@ -18,7 +18,7 @@ app.config['TESTING'] = False
 db_config = {
     'dbname': 'TaskManagement',
     'user': 'postgres',
-    'password': 'shaheen1',
+    'password': 'user',
     'host': 'localhost',
     'port': '5432'
 }

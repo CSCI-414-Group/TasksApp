@@ -11,6 +11,8 @@ function toggleDarkMode() {
     }
 }
 
+
+
 function checkEmail() {
     var email = document.getElementById("email").value;
     var errorContainer = document.getElementById("error-message");
@@ -35,50 +37,6 @@ function checkEmail() {
             }
         })
         .catch(error => console.error("Error:", error));
-}
-
-
-
-async function addTaskToServer(taskName, status, folderName, binaryData, imageFile) {
-    var fileName;
-    if (!imageFile) {
-        fileName = null;
-    } else {
-        fileName = imageFile.name;
-    }
-    const response = await fetch('/addTaskToFolder', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            folderName: folderName,
-            taskName: taskName,
-            status: status,
-            imageData: binaryData,
-            fileName: fileName,
-        }),
-    });
-
-    const result = await response.json();
-    if (result.success) {
-        alert('Task added successfully!');
-    } else {
-        alert('Failed to add the task. Please check your input and try again.');
-    }
-}
-
-function addTaskToColumn(taskName, taskStatus) {
-    const taskItem = document.createElement('li');
-    taskItem.textContent = taskName;
-
-    if (taskStatus === 'Pending') {
-        document.getElementById('pending-tasks').appendChild(taskItem);
-    } else if (taskStatus === 'In Progress') {
-        document.getElementById('in-progress-tasks').appendChild(taskItem);
-    } else if (taskStatus === 'Completed') {
-        document.getElementById('completed-tasks').appendChild(taskItem);
-    }
 }
 
 
@@ -122,12 +80,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // Add Folder button click event
     addFolderButton.addEventListener('click', function () {
         const folder_name = document.getElementById('folder_name').value;
-    
+
         if (folder_name.trim() === "") {
             alert("Folder name cannot be empty");
             return; // Do not proceed with the fetch request
         }
-    
+
         // Check folder existence on the server
         fetch('/checkFolderExistence', {
             method: 'POST',
@@ -136,35 +94,35 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Content-Type': 'application/json'
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.exists) {
-                alert("Folder name already exists");
-            } else {
-                // If folder does not exist, proceed to add the folder
-                fetch('/addFolder', {
-                    method: 'POST',
-                    body: JSON.stringify({ folderName: folder_name }),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }) // The misplaced closing parenthesis was here.
-                .then(response => response.json())
-                .then(data => {
-                    messageDiv.innerHTML = data.message;
-                    refreshFolderList();
-                })
-                .catch(error => {
-                    messageDiv.innerHTML = `Error: ${error}`;
-                });
-            }
-        }) // There was a misplaced curly brace and parenthesis here.
-        .catch(error => {
-            messageDiv.innerHTML = `Error: ${error}`;
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.exists) {
+                    alert("Folder name already exists");
+                } else {
+                    // If folder does not exist, proceed to add the folder
+                    fetch('/addFolder', {
+                        method: 'POST',
+                        body: JSON.stringify({ folderName: folder_name }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }) // The misplaced closing parenthesis was here.
+                        .then(response => response.json())
+                        .then(data => {
+                            messageDiv.innerHTML = data.message;
+                            refreshFolderList();
+                        })
+                        .catch(error => {
+                            messageDiv.innerHTML = `Error: ${error}`;
+                        });
+                }
+            }) // There was a misplaced curly brace and parenthesis here.
+            .catch(error => {
+                messageDiv.innerHTML = `Error: ${error}`;
+            });
     });
-    
-    
+
+
 
     function createEditButton(folderName) {
         const editButton = document.createElement('button');
@@ -173,15 +131,15 @@ document.addEventListener('DOMContentLoaded', function () {
             // Show the modal
             const modal = document.getElementById('myModal');
             modal.style.display = "block";
-    
+
             // Get the <span> element that closes the modal
             const span = document.getElementsByClassName("close")[0];
-            span.onclick = function() {
+            span.onclick = function () {
                 modal.style.display = "none";
             }
-    
+
             // Handle the submission of the new folder name
-            document.getElementById('submitNewFolderName').onclick = function() {
+            document.getElementById('submitNewFolderName').onclick = function () {
                 const newFolderName = document.getElementById('newFolderNameInput').value;
                 if (newFolderName) {
                     fetch('/editFolder', {
@@ -195,24 +153,24 @@ document.addEventListener('DOMContentLoaded', function () {
                             'Content-Type': 'application/json'
                         }
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            refreshFolderList();
-                        } else {
-                            console.error('Error: ' + data.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error: ' + error);
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                refreshFolderList();
+                            } else {
+                                console.error('Error: ' + data.error);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error: ' + error);
+                        });
                     modal.style.display = "none"; // Close the modal after submission
                 }
             };
         });
         return editButton;
     }
-    
+
 
 
     // Remove Folder button click event
@@ -345,7 +303,7 @@ document.addEventListener("DOMContentLoaded", function () {
         taskItem.appendChild(editButton);
     }
 
-    function updateTaskOnServer(folderName, taskName, newTaskName, newTaskStatus, newTaskImageFile, imageName, removeImage){
+    function updateTaskOnServer(folderName, taskName, newTaskName, newTaskStatus, newTaskImageFile, imageName, removeImage) {
         fetch('/update', {
             method: 'POST',
             headers: {
@@ -402,80 +360,119 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
+    function fetchTasksAndDisplay(folderName) {
+        fetch(`/getFolderTask?folder_name=${folderName}`)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.error) {
+                    displayTasks(data.folders);
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }
+
+    async function addTaskToServer(taskName, status, folderName, binaryData, imageFile) {
+        var fileName;
+        if (!imageFile) {
+            fileName = null;
+        } else {
+            fileName = imageFile.name;
+        }
+        const response = await fetch('/addTaskToFolder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                folderName: folderName,
+                taskName: taskName,
+                status: status,
+                imageData: binaryData,
+                fileName: fileName,
+            }),
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert('Task added successfully!');
+            fetchTasksAndDisplay(folderName);
+        } else {
+            alert('Failed to add the task. Please check your input and try again.');
+        }
+    }
 
 
-    // Add a click event listener to the folder list
+
+    function displayTasks(tasks) {
+        taskList.innerHTML = ''; // Clear previous tasks
+        document.getElementById('pending-tasks').innerHTML = '';
+        document.getElementById('in-progress-tasks').innerHTML = '';
+        document.getElementById('completed-tasks').innerHTML = '';
+
+        tasks.forEach(task => {
+            const taskItem = document.createElement('div');
+            taskItem.setAttribute('data-title', task.name); // Add data-title attribute
+            taskItem.setAttribute('data-status', task.status);
+            taskItem.style.border = '1px solid black';
+            taskItem.style.margin = '10px -15px';
+            taskItem.style.padding = '5px';
+
+            const column = getColumn(task.status);
+            if (column) {
+                column.appendChild(taskItem);
+            }
+
+            const taskDetails = document.createElement('div');
+            let taskDetailsHTML = `<p>Title: ${task.name}</p>`;
+            if (task.imageFileData) {
+                taskDetailsHTML += `
+                <p>Image: <a href="data:image/png;base64,${task.imageFileData}" download="${task.imageFileName}">
+                    <img src="data:image/png;base64,${task.imageFileData}" alt="${task.imageFileName}" class="task-image" />
+                </a>`;
+            }
+
+            taskDetails.innerHTML = taskDetailsHTML;
+            taskItem.appendChild(taskDetails);
+            taskItem.classList.add('task-border');
+            taskItem.appendChild(taskDetails);
+            createEditButton(taskItem);
+            createDeleteButton(task.name, taskItem);
+        });
+    }
+
+
+    // Function to determine the correct column based on the task status
+    function getColumn(status) {
+        switch (status) {
+            case "Pending":
+                return document.getElementById('pending-tasks');
+            case "In Progress":
+                return document.getElementById('in-progress-tasks');
+            case "Completed":
+                return document.getElementById('completed-tasks');
+            default:
+                return null;
+        }
+    }
+
+    // Your existing event listener code
     folderList.addEventListener("click", function (event) {
         const target = event.target;
         if (target.tagName === 'LI') {
-            var folderName = target.textContent.replace('Remove', '');
-            folderName = folderName.replace('Edit', '');
-            folderNameFromClick = folderName
-            console.log(folderName);
-            // Make an AJAX request to your Python route
+            const content = document.querySelector('.content');
+            content.style.display = 'flex';
+            var folderName = target.textContent.replace('Remove', '').replace('Edit', '');
+            folderNameFromClick = folderName;
+
             fetch(`/getFolderTask?folder_name=${folderName}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
                         alert(data.error);
                     } else {
-                        // Display tasks in the task list
-                        taskList.innerHTML = ''; // Clear previous tasks
-                        document.getElementById('pending-tasks').innerHTML = '';
-                        document.getElementById('in-progress-tasks').innerHTML = '';
-                        document.getElementById('completed-tasks').innerHTML = '';
-                        data.folders.forEach(task => {
-                            const taskItem = document.createElement('div');
-                            taskItem.setAttribute('data-title', task.name); // Add data-title attribute
-                            taskItem.setAttribute('data-status', task.status);
-
-                            // Create a function to determine the correct column based on the task status
-                            function getColumn(status) {
-                                switch (status) {
-                                    case "Pending":
-                                        return document.getElementById('pending-tasks');
-                                    case "In Progress":
-                                        return document.getElementById('in-progress-tasks');
-                                    case "Completed":
-                                        return document.getElementById('completed-tasks');
-                                    default:
-                                        return null;
-                                }
-                            }
-
-                            // Get the appropriate column and append the task item
-                            const column = getColumn(task.status);
-                            if (column) {
-                                column.appendChild(taskItem);
-                            }
-
-                            // Create a container for the task details
-                            const taskDetails = document.createElement('div');
-
-                            // Create the task details HTML based on whether the file is defined
-                            let taskDetailsHTML = `<p>Title: ${task.name}</p>`;
-
-                            if (task.imageFileData) {
-                                // Include the image with a downloadable link
-                                taskDetailsHTML += `
-                                    <p>Image: <a href="data:image/png;base64,${task.imageFileData}" download="${task.imageFileName}">
-                                        <img alt="${task.imageFileName}" />
-                                    </a>`;
-                            }
-
-                            // Add task details to the container
-                            taskDetails.innerHTML = taskDetailsHTML;
-
-                            // Append the task details container to the task item
-                            taskItem.appendChild(taskDetails);
-
-
-                            // Append the task details container to the task item
-                            taskItem.appendChild(taskDetails);
-
-                            createEditButton(taskItem);
-                            createDeleteButton(task.name, taskItem);
-                        });
+                        displayTasks(data.folders);
                     }
                 })
                 .catch(error => {
@@ -483,6 +480,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
         }
     });
+
 
 
 
@@ -516,7 +514,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const newTaskStatus = taskStatus.options[taskStatus.selectedIndex].value;
         const folderName = folderNameFromClick;
         const taskImage = document.getElementById('taskImage').files[0];
-    
+
         if (taskName && newTaskStatus) {
             // First, check if task already exists
             const doesTaskExist = await checkIfTaskExists(taskName, folderName);
@@ -524,7 +522,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert("Task already exists in the folder");
                 return;
             }
-    
+
             const binaryData = taskImage ? await readFileAsBase64(taskImage) : null;
             addTaskToServer(taskName, newTaskStatus, folderName, binaryData, taskImage);
             taskPopup.style.display = 'none';
@@ -549,7 +547,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
     }
-    
+
 
     async function readFileAsBase64(file) {
         return new Promise((resolve, reject) => {
@@ -602,43 +600,43 @@ document.addEventListener("DOMContentLoaded", function () {
         editTaskNameInput.value = taskName;
         editTaskStatusInput.value = taskStatus;
         editTaskImageInput.value = ''; // Clear the file input
-    
+
         // Display the edit task popup
         editTaskPopup.style.display = 'block';
-    
+
         // Handle the save button click
         saveEditButton.onclick = async function () {
             const newTaskName = editTaskNameInput.value;
             const newTaskStatus = editTaskStatusInput.value;
             const removeImage = editTaskRemoveImageCheckbox.checked;
-    
+
             // Determine the file input and its selected file
             const newTaskImageInput = editTaskImageInput;
             const newTaskImageFile = newTaskImageInput.files[0];
             let binaryData;
-            if(newTaskImageFile){
+            if (newTaskImageFile) {
                 fileName = newTaskImageFile.name;
                 binaryData = newTaskImageFile ? await readFileAsBase64(newTaskImageFile) : null;
             }
-            else{
+            else {
                 fileName = null;
             }
-    
+
             // Call the function to update the task
-            updateTaskOnServer(folderNameFromClick, taskName, newTaskName, newTaskStatus, binaryData, fileName,removeImage);
+            updateTaskOnServer(folderNameFromClick, taskName, newTaskName, newTaskStatus, binaryData, fileName, removeImage);
 
             // Hide the edit task popup after saving
             editTaskPopup.style.display = 'none';
         };
     }
-    
+
     // Close the edit task popup
     const closeEditPopup = document.getElementById('closeEditPopup');
     closeEditPopup.addEventListener('click', function () {
         const editTaskPopup = document.getElementById('editTaskPopup');
         editTaskPopup.style.display = 'none';
     });
-    
+
     // Add an event listener to open the edit task popup when you click on a task
     document.addEventListener('click', function (event) {
         if (event.target && event.target.classList.contains('edit-button')) {
@@ -647,11 +645,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const folderName = folderNameFromClick;
             const taskName = taskItem.getAttribute('data-title');
             const taskStatus = taskItem.getAttribute('data-status');
-    
+
             // Call the function to open the edit task popup
             openEditTaskPopup(folderName, taskName, taskStatus);
         }
     });
-    
-});
 
+});
