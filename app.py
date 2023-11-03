@@ -15,8 +15,9 @@ app.secret_key = str(uuid.uuid4())  # Replace with a secure secret key
 app.config['TESTING'] = False
 
 #postgre sql setup
+
 db_config = {
-    'dbname': 'Project1',
+    'dbname': 'TaskManagement',
     'user': 'postgres',
     'password': 'shaheen1',
     'host': 'localhost',
