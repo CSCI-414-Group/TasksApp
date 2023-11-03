@@ -11,8 +11,6 @@ function toggleDarkMode() {
     }
 }
 
-
-
 function checkEmail() {
     var email = document.getElementById("email").value;
     var errorContainer = document.getElementById("error-message");
@@ -38,8 +36,6 @@ function checkEmail() {
         })
         .catch(error => console.error("Error:", error));
 }
-
-
 
 document.addEventListener('DOMContentLoaded', function () {
     const addFolderForm = document.getElementById('addFolderForm');
@@ -122,8 +118,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     });
 
-
-
     function createEditButton(folderName) {
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
@@ -170,8 +164,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         return editButton;
     }
-
-
 
     // Remove Folder button click event
     function createRemoveButton(folderName) {
@@ -329,29 +321,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     console.log('Task updated:', newTaskDocument);
                     const newTaskName = newTaskDocument.name;
                     const newTaskStatus = newTaskDocument.status;
-                    /*
-                    const newImage = newTaskDocument.imageFileData;
-                    /const fileName = newTaskDocument.imageFileName;
-                    taskItem.setAttribute('data-title', newTaskName);
-                    taskItem.setAttribute('data-status', newTaskStatus);
-                    taskItem.innerHTML = `
-                    <div>
-                        Title: ${task.name}<br>Status: ${task.status}
-                        ${task.imageFileName && task.imageFileData
-                            ? `
-                            <a href="${task.imageFileData}" download="${task.imageFileName}">
-                                ${task.imageFileName}
-                            </a>
-                        `
-                            : ''
-                        }
-                    </div>
-                `;
-                    taskList.appendChild(taskItem);
-                    createEditButton(taskItem);
-                    createDeleteButton(newTaskName, taskItem);
-                    alert('Task edited successfully!');
-                    */
+                    fetchTasksAndDisplay(folderName);
                 }
             })
             .catch(error => {
@@ -403,8 +373,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-
-
     function displayTasks(tasks) {
         taskList.innerHTML = ''; // Clear previous tasks
         document.getElementById('pending-tasks').innerHTML = '';
@@ -441,7 +409,6 @@ document.addEventListener("DOMContentLoaded", function () {
             createDeleteButton(task.name, taskItem);
         });
     }
-
 
     // Function to determine the correct column based on the task status
     function getColumn(status) {
@@ -481,18 +448,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-
-
-
-
     const taskPopup = document.getElementById('taskPopup');
     const addTaskButton = document.getElementById('addTaskButton');
     const closePopup = document.getElementById('closePopup');
     const addTaskToFolderButton = document.getElementById('addTaskToFolder');
     const selectedStatusElement = document.getElementById('taskStatus');
     const newTaskStatus = selectedStatusElement.value; // Use .value to get the selected status as a string
-
-
 
     addTaskButton.addEventListener('click', function () {
         // Set the selected folder name in the popup
@@ -548,7 +509,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-
     async function readFileAsBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -557,7 +517,6 @@ document.addEventListener("DOMContentLoaded", function () {
             reader.readAsDataURL(file);
         });
     }
-
 
     document.addEventListener('DOMContentLoaded', function () {
         // Get the button element by its ID
