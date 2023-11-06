@@ -1,5 +1,48 @@
-CREATE TABLE Users (
+--users table (relation db)
+
+CREATE TABLE Users
+(
     user_id serial PRIMARY KEY,
     username text UNIQUE NOT NULL,
     password text NOT NULL
 );
+
+--tasks sample table (noSql db)
+
+--Task Document:
+{
+   "_id": ObjectId
+("user_id"),
+   "username": "user_name",
+   "folders": [
+      {
+         "name": "Folder 1",
+         "tasks": [
+            {
+               "title": "Task 4",
+               "status": "todo",
+               "imageName": "task4.jpg"
+                "imageDate": Binary
+
+            },
+            {
+               "title": "Task 5",
+               "status": "inprogress",
+            }
+         ]
+      },
+      {
+         "name": "Folder 2",
+         "tasks": [
+            {
+               "title": "Task 6",
+               "status": "inprogress",
+            },
+            {
+               "title": "Task 7",
+               "status": "done",
+            }
+         ]
+      }
+   ]
+}
